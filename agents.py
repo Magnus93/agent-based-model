@@ -3,73 +3,74 @@ import math
 
 
 class Agents(object):
-    def __init__(self, num_s, num_i, num_r):
-        self.init = { "S": num_s, "I": num_i, "R": num_r }
-        self.agents = {}
-        self.num_agents = 0 
-        for stage in stages:
-            self.agents[stage.name] = [] 
+    def __init__(self, NS, NE, NI, NR):
+        self.agents = [] 
+        self.sizes = { "S": 0, "E": 0, "I": 0, "R": 0 }
 
-        for i in range(num_s):
+        for i in range(NS):
             self.add_agent(stages.S)
 
-        for i in range(num_i):
+        for i in range(NE):
+            self.add_agent(stages.E)
+
+        for i in range(NI):
             self.add_agent(stages.I)
 
-        for i in range(num_r):
+        for i in range(NR): 
             self.add_agent(stages.R)
 
     def reset(self):
-        temp_agents = {} 
-        for stage in stages:
-            temp_agents[stage.name] = [] 
+        self.sizes = { "S": 0, "E": 0, "I": 0, "R": 0 }
+        for agent in self.agents:
+            agent.reset()
+            init_stage = agent.get_stage()
+            self.sizes[init_stage.name] += 1
 
+    def get_population_size(self):
+        N = 0
         for stage in stages:
-            agts = self.agents[stage.name]
-            for agent in agts:
-                agent.reset()
-                init_stage = agent.get_stage()
-                temp_agents[init_stage.name].append(agent) 
-        self.agents = temp_agents 
+            N += self.sizes[stage.name]
+        return N 
 
     def add_agent(self, stage):
-        new_agent = Agent(self.num_agents, stage)
-        self.agents[stage.name].append(new_agent)
-        self.num_agents += 1 
+        new_agent = Agent(self.get_population_size(), stage)
+        self.agents.append(new_agent)
+        self.sizes[stage.name] += 1
 
     def move_individual(self, inv, dst_stage):
         src_stage = inv.stage
-        self.agents[src_stage.name].remove(inv)
-        self.agents[dst_stage.name].append(inv)
         inv.set_stage(dst_stage) 
+        self.sizes[src_stage.name] -= 1
+        self.sizes[dst_stage.name] += 1
 
     def step(self, timestep):
-        p = 1/7500 
-        NS = len(self.agents["S"])
-        NI = len(self.agents["I"])
-        NR = len(self.agents["R"])
+        # get number of infectious before step 
+        NI = self.sizes["I"] 
 
-        # loop through infectious and check if any become removed 
-        for inv in self.agents["I"]:
-            inv.reduce_time_until(timestep) 
-            until = inv.get_time_until()
-            if (type(until) is float and until < 0):
-                self.move_individual(inv, stages.R) 
-
-        # loop through suseptible and check their if any gets infected 
-        for inv in self.agents["S"]:
-            rand = random.random()
-            risk = 1 - math.exp(timestep * NI * math.log(1-p))
-            if rand < risk:
-                self.move_individual(inv, stages.I)  
+        for inv in self.agents:
+            if (inv.get_stage() == stages.S):
+                rand = random.random()
+                risk = 1 - math.exp(timestep * NI * math.log(1-inv.p))
+                if rand < risk:
+                    self.move_individual(inv, stages.E) 
+            elif (inv.get_stage() == stages.E):
+                inv.reduce_time_until(timestep)
+                until = inv.get_time_until()
+                if (type(until) is float and until < 0):
+                    self.move_individual(inv, stages.I) 
+            elif (inv.get_stage() == stages.I):
+                inv.reduce_time_until(timestep) 
+                until = inv.get_time_until()
+                if (type(until) is float and until < 0):
+                    self.move_individual(inv, stages.R) 
 
     def __getitem__(self, key):
-        return len(self.agents[key]) 
+        return self.sizes[key]
 
     def __str__(self):
         string = ""
         for stage in stages:
-            num = len(self.agents[stage.name])
+            num = self[stage.name] 
             string += "{}: {}, \t".format(stage.name, num)
         return string 
 
