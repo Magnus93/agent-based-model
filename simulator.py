@@ -26,8 +26,15 @@ class Simulator:
             print("==================")
             print("Duration: {} days \nEpidemic size: {}".format(self.time, self.agents["R"]))
     
-    def get_results():
-        return { "epidemic": self.agents["R"], "duration": self.time } 
+    def get_results(self):
+        return { "duration": self.time , "epidemic": self.agents["R"] } 
+
+    def reset(self):
+        self.agents.reset() 
+        self.time = 0 
+        self.prev_NS = self.agents["S"]
+        self.prev_NI = self.agents["I"]
+        self.prev_NR = self.agents["R"]
 
 if __name__ == "__main__":
     sim = Simulator(1000, 1, 0)

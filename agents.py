@@ -4,6 +4,7 @@ import math
 
 class Agents(object):
     def __init__(self, num_s, num_i, num_r):
+        self.init = { "S": num_s, "I": num_i, "R": num_r }
         self.agents = {}
         self.num_agents = 0 
         for stage in stages:
@@ -17,6 +18,19 @@ class Agents(object):
 
         for i in range(num_r):
             self.add_agent(stages.R)
+
+    def reset(self):
+        temp_agents = {} 
+        for stage in stages:
+            temp_agents[stage.name] = [] 
+
+        for stage in stages:
+            agts = self.agents[stage.name]
+            for agent in agts:
+                agent.reset()
+                init_stage = agent.get_stage()
+                temp_agents[init_stage.name].append(agent) 
+        self.agents = temp_agents 
 
     def add_agent(self, stage):
         new_agent = Agent(self.num_agents, stage)
