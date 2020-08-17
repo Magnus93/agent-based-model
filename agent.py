@@ -7,10 +7,10 @@ from prob import *
 stages = Enum("stage", "S E I R")
 
 class Agent:
-    def __init__(self, id, init_stage): 
+    def __init__(self, id, init_stage, p=1/7500): 
         self.id = id
         self.time_until_transition = None 
-        self.p = 1/7500
+        self.p = p 
         self.T_e = 5 
         self.T_i = 15 
         self.init_stage = init_stage 

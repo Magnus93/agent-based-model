@@ -3,24 +3,15 @@ import math
 
 
 class Agents(object):
-    def __init__(self, num_s, num_e, num_i, num_r):
-        self.init = { "S": num_s, "E": num_e, "I": num_i, "R": num_r }
+    def __init__(self, specs):
         self.agents = {} 
         self.num_agents = 0 
         for stage in stages:
             self.agents[stage.name] = [] 
 
-        for i in range(num_s):
-            self.add_agent(stages.S)
-
-        for i in range(num_e):
-            self.add_agent(stages.E)
-
-        for i in range(num_i):
-            self.add_agent(stages.I)
-
-        for i in range(num_r):
-            self.add_agent(stages.R)
+        for spec in specs:
+            for i in range(spec["amount"]):
+                self.add_agent(spec)  
 
     def reset(self):
         temp_agents = {} 
@@ -35,9 +26,12 @@ class Agents(object):
                 temp_agents[init_stage.name].append(agent) 
         self.agents = temp_agents 
 
-    def add_agent(self, stage):
-        new_agent = Agent(self.num_agents, stage)
-        self.agents[stage.name].append(new_agent)
+    def add_agent(self, spec):
+        p = None 
+        if "p" in spec:
+            p = spec["p"]
+        new_agent = Agent(self.num_agents, stages[spec["init_stage"]], p)
+        self.agents[spec["init_stage"]].append(new_agent)
         self.num_agents += 1 
 
     def move_individual(self, inv, dst_stage):

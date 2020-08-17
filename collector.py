@@ -5,7 +5,7 @@ import pandas as pd
 import time 
 
 filename = "agent-based"
-N_sim = 5000 
+N_sim = 25 
 print_every = 20 
 
 # Create the pandas DataFrame 
@@ -14,7 +14,12 @@ data = pd.DataFrame()
 
 if __name__ == "__main__": 
     start_time = time.time()
-    sim = Simulator(1000, 1, 0, 0) 
+    specs = [
+    {"amount": 500, "init_stage": "S", "p": 1/5000,}, 
+    {"amount": 500, "init_stage": "S", "p": 1/15000,}, 
+    {"amount": 1, "init_stage": "E"}
+    ]
+    sim = Simulator(specs) 
     for i in range(N_sim):
         sim.run(print_every=False, print_end=False)
         results = sim.get_results()
