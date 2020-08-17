@@ -9,11 +9,6 @@ class Simulator:
         self.prev_NS = NS
         self.prev_NI = NI
         self.prev_NR = NR 
-        self.seed = 3 
-
-
-    def increment_seed():
-        self.seed += 1
         
     def run(self, print_every=True, print_end=True):
         while(self.time <= self.time_end and self.agents["I"] > 0):

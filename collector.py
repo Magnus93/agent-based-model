@@ -3,13 +3,12 @@ from simulator import *
 import random 
 
 
-N_sim = 1000 
-seed = 1 
+N_sim = 50  
 
 
 
 if __name__ == "__main__":
-    sim = Simulator(1000, 1, 0)  
-    
     for i in range(N_sim):
+        print("--- iteration {} ---".format(i))
+        sim = Simulator(1000, 1, 0) 
         sim.run(print_every=False, print_end=True)
