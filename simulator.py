@@ -1,22 +1,24 @@
 from agents import * 
 
 class Simulator:
-    def __init__(self, NS, NI, NR):
+    def __init__(self, NS, NE, NI, NR):
         self.time = 0
         self.time_end = 5000
         self.timestep = 0.25 
-        self.agents = Agents(NS, NI, NR) 
+        self.agents = Agents(NS, NE, NI, NR) 
         self.prev_NS = NS
+        self.prev_NE = NE 
         self.prev_NI = NI
         self.prev_NR = NR 
         
     def run(self, print_every=True, print_end=True):
-        while(self.time <= self.time_end and self.agents["I"] > 0):
+        while(self.time <= self.time_end and self.agents["E"] + self.agents["I"] > 0):
             self.agents.step(self.timestep)
             if (print_every):
                 if (self.prev_NS != self.agents["S"] or self.prev_NI != self.agents["I"] or self.prev_NR != self.agents["R"]):
                     print("t = {}:\t agents = {}".format(self.time, self.agents)) 
                 self.prev_NS = self.agents["S"]
+                self.prev_NE = self.agents["E"]
                 self.prev_NI = self.agents["I"]
                 self.prev_NR = self.agents["R"]
 
@@ -37,7 +39,7 @@ class Simulator:
         self.prev_NR = self.agents["R"]
 
 if __name__ == "__main__":
-    sim = Simulator(1000, 1, 0)
+    sim = Simulator(1000, 1, 0, 0)
     sim.run() 
 
     

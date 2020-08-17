@@ -4,13 +4,14 @@ from prob import *
 
 # S -> I -> R
 
-stages = Enum("stage", "S I R")
+stages = Enum("stage", "S E I R")
 
 class Agent:
     def __init__(self, id, init_stage): 
         self.id = id
         self.time_until_transition = None 
         self.p = 1/7500
+        self.T_e = 5 
         self.T_i = 15 
         self.init_stage = init_stage 
         self.stage = None
@@ -18,9 +19,12 @@ class Agent:
 
     def set_stage(self, new_stage):
         self.stage = new_stage 
-        if (self.stage == stages.I):
-            exposed_time = erlang(3, self.T_i) 
-            self.set_time_until(exposed_time) 
+        if (self.stage == stages.E):
+            exposed_time = expo(self.T_e)
+            self.set_time_until(exposed_time)
+        elif (self.stage == stages.I):
+            infectious_time = erlang(3, self.T_i) 
+            self.set_time_until(infectious_time) 
 
     def get_stage(self):
         return self.stage 
