@@ -19,8 +19,7 @@ class Agent:
     def set_stage(self, new_stage):
         self.stage = new_stage 
         if (self.stage == stages.I):
-            exposed_time = expo(self.T_i) 
-            # print("exposed_time = {}".format(exposed_time))
+            exposed_time = erlang(3, self.T_i) 
             self.set_time_until(exposed_time) 
 
     def get_stage(self):
