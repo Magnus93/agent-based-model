@@ -16,7 +16,7 @@ class Simulator:
             self.agents.step(self.timestep)
             if (print_every):
                 if (self.prev_NS != self.agents["S"] or self.prev_NI != self.agents["I"] or self.prev_NR != self.agents["R"]):
-                    print("t = {}:\t agents = {}".format(self.time, self.agents)) 
+                     print(self)
                 self.prev_NS = self.agents["S"]
                 self.prev_NE = self.agents["E"]
                 self.prev_NI = self.agents["I"]
@@ -25,9 +25,13 @@ class Simulator:
             self.time += self.timestep 
 
         if (print_end):
+            print("FINAL: \t"+str(self))
             print("==================")
             print("Duration: {} days \nEpidemic size: {}".format(self.time, self.agents["R"]))
     
+    def __str__(self):
+        return "t = {}:\t agents = {}".format(self.time, self.agents)
+
     def get_results(self):
         return { "duration": self.time , "epidemic": self.agents["R"] } 
 
