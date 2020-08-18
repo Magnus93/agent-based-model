@@ -33,7 +33,17 @@ class Simulator:
         return "t = {}:\t agents = {}".format(self.time, self.agents)
 
     def get_results(self):
-        return { "duration": self.time , "epidemic": self.agents["R"] } 
+        return { 
+            "duration": self.time , 
+            "epidemic": self.agents["R"],
+            "R": {
+                "high_risk": self.agents.get_group_in_stage("high_risk", "R"),
+                "low_risk": self.agents.get_group_in_stage("low_risk", "R")
+            }
+        } 
+
+    def get_group_in_stage(self, group_name, stage_name):
+        return self.agents.get_group_in_stage(group_name, stage_name)
 
     def reset(self):
         self.agents.reset() 
@@ -45,13 +55,9 @@ class Simulator:
 if __name__ == "__main__":
     
     specs = [
-    {"amount": 500, "init_stage": "S", "p": 1/5000,}, 
-    {"amount": 500, "init_stage": "S", "p": 1/15000,}, 
+    {"amount": 500, "init_stage": "S", "p": 1/5000, "group_name": "high_risk"}, 
+    {"amount": 500, "init_stage": "S", "p": 1/15000, "group_name": "low_risk"}, 
     {"amount": 1, "init_stage": "E"}
     ]
     sim = Simulator(specs)
     sim.run() 
-
-    
-
-    

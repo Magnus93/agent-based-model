@@ -9,7 +9,7 @@ N_sim = 25
 print_every = 20 
 
 # Create the pandas DataFrame 
-table = pd.DataFrame(columns = ['Duration', 'Epidemic']) 
+table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'Removed high risk', 'Removed low risk']) 
 data = pd.DataFrame() 
 
 if __name__ == "__main__": 
@@ -23,7 +23,14 @@ if __name__ == "__main__":
     for i in range(N_sim):
         sim.run(print_every=False, print_end=False)
         results = sim.get_results()
-        table.loc[len(table)] = [results["duration"], results["epidemic"]] 
+
+        table.loc[len(table)] = [
+            results["duration"], 
+            results["epidemic"],
+            results["R"]["high_risk"],
+            results["R"]["low_risk"]
+        ] 
+
         sim.reset() 
 
         if i%print_every == 1:

@@ -65,6 +65,13 @@ class Agents(object):
             if rand < risk:
                 self.move_individual(inv, stages.E)  
 
+    def get_group_in_stage(self, group_name, stage_name):
+        counter = 0
+        for inv in self.agents[stage_name]:
+            if inv.group_name == group_name:
+                counter += 1 
+        return counter 
+
     def __getitem__(self, key):
         return len(self.agents[key]) 
 
