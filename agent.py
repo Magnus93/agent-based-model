@@ -1,21 +1,26 @@
 from enum import Enum 
 from prob import *  
 
+get_attr = lambda dct, key, default: dct[key] if key in dct else default  
 
 # S -> I -> R
 
 stages = Enum("stage", "S E I R")
 
+default_p = 1/7500 
+
 class Agent:
-    def __init__(self, id, init_stage, p=1/7500): 
+    def __init__(self, id, spec): 
         self.id = id
         self.time_until_transition = None 
-        self.p = p 
+
+        self.p = get_attr(spec, "p", default_p)
+        self.group_name = get_attr(spec, "group_name", "noname")
         self.T_e = 5 
         self.T_i = 15 
-        self.init_stage = init_stage 
+        self.init_stage = stages[spec["init_stage"]]
         self.stage = None
-        self.set_stage(init_stage) 
+        self.set_stage(self.init_stage) 
 
     def set_stage(self, new_stage):
         self.stage = new_stage 

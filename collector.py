@@ -15,8 +15,8 @@ data = pd.DataFrame()
 if __name__ == "__main__": 
     start_time = time.time()
     specs = [
-    {"amount": 500, "init_stage": "S", "p": 1/5000,}, 
-    {"amount": 500, "init_stage": "S", "p": 1/15000,}, 
+    {"amount": 500, "init_stage": "S", "p": 1/5000,  "group_name": "high_risk" }, 
+    {"amount": 500, "init_stage": "S", "p": 1/15000, "group_name": "low_risk" }, 
     {"amount": 1, "init_stage": "E"}
     ]
     sim = Simulator(specs) 

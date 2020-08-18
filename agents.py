@@ -30,7 +30,7 @@ class Agents(object):
         p = None 
         if "p" in spec:
             p = spec["p"]
-        new_agent = Agent(self.num_agents, stages[spec["init_stage"]], p)
+        new_agent = Agent(self.num_agents, spec)
         self.agents[spec["init_stage"]].append(new_agent)
         self.num_agents += 1 
 
