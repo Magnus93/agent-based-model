@@ -4,24 +4,31 @@ import random
 import pandas as pd 
 import time 
 from aux_funtions import * 
+from prob import * 
 
 filename = "agent-based"
 N_sim = 100 
 print_every = 10
 
+NS = 1000 
+
 # Create the pandas DataFrame 
 table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'Removed high risk', 'Removed low risk']) 
 data = pd.DataFrame() 
 
+
 if __name__ == "__main__": 
     start_time = time.time()
-    specs = [
-    {"amount": 500, "init_stage": "S", "p": 1/5000,  "group_name": "high_risk" }, 
-    {"amount": 500, "init_stage": "S", "p": 1/15000, "group_name": "low_risk" }, 
-    {"amount": 1, "init_stage": "E"}
-    ]
-    sim = Simulator(specs) 
+    
     for i in range(N_sim):
+        N_high = binomial(NS, 0.5) 
+        specs = [
+            {"amount": N_high, "init_stage": "S", "p": 1/5000,  "group_name": "high_risk" }, 
+            {"amount": NS-N_high, "init_stage": "S", "p": 1/15000, "group_name": "low_risk" }, 
+            {"amount": 1, "init_stage": "E"}
+        ]
+        sim = Simulator(specs) 
+
         sim.run(print_every=False, print_end=False)
         results = sim.get_results()
 
@@ -31,8 +38,6 @@ if __name__ == "__main__":
             results["R"]["high_risk"],
             results["R"]["low_risk"]
         ] 
-
-        sim.reset() 
 
         if i%print_every == 0 and i != 0:
             time_past = time.time() - start_time 
