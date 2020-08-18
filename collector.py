@@ -3,10 +3,11 @@ from simulator import *
 import random 
 import pandas as pd 
 import time 
+from aux_funtions import * 
 
 filename = "agent-based"
-N_sim = 25 
-print_every = 20 
+N_sim = 100 
+print_every = 10
 
 # Create the pandas DataFrame 
 table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'Removed high risk', 'Removed low risk']) 
@@ -33,17 +34,15 @@ if __name__ == "__main__":
 
         sim.reset() 
 
-        if i%print_every == 1:
+        if i%print_every == 0 and i != 0:
             time_past = time.time() - start_time 
             eta =  time_past*(N_sim - i) / i   
-            eta_m = int(eta//60)
-            eta_s = int(eta%60) 
-            print("iteration {}, \t eta: {} min {} s".format(i, eta_m, eta_s))
+            print("iteration {}, \t eta: {}".format(i, sec_to_str(eta)))
 
     
     exec_time = time.time() - start_time
     print("####### Collection DONE #######")
-    print("Exec. time: \t{:.{prec}f} sec.".format(exec_time, prec=2))
+    print("Exec. time: \t{}".format(sec_to_str(exec_time)))
     print("num. repl.: \t{}".format(N_sim))
     # sort table by epidemic size 
     table = table.sort_values(by="Epidemic")
