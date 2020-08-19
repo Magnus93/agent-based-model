@@ -1,20 +1,26 @@
 from prob import *
 import pandas as pd 
 
+sums = { 
+    "uniform": 0, 
+    "expo":    0,
+    "1erlang": 0, 
+    "2erlang": 0,
+    "3erlang": 0,
+    "4erlang": 0 
+}
 
-table = pd.DataFrame(columns=["unifrom", "expo", "erlang-2", "erlang-3", "erlang-4", "tri"])
 
-N = 100000
+N = 10000
 for i in range(N):
-    if i % 1000 == 0:
-        print(i) 
-    table.loc[len(table)] = [ 
-        random.random(),
-        expo(5),
-        erlang(2, 5),
-        erlang(3, 5),
-        erlang(4, 5),
-        random.triangular(2, 7, 5)
-    ] 
+    sums["uniform"] += random.random()
+    sums["expo"] += expo(5)
+    sums["1erlang"] += erlang(1, 15)
+    sums["2erlang"] += erlang(2, 7.5)
+    sums["3erlang"] += erlang(3, 5)
+    sums["4erlang"] += erlang(4, 3.75)
 
-table.to_csv("random-distributions.csv")
+print(N)
+for r in sums:
+    print("{}: \t{}".format(r, sums[r]/N))
+

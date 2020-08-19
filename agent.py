@@ -28,7 +28,7 @@ class Agent:
             exposed_time = expo(self.T_e)
             self.set_time_until(exposed_time)
         elif (self.stage == stages.I):
-            infectious_time = erlang(3, self.T_i) 
+            infectious_time = erlang(3, self.T_i/3) 
             self.set_time_until(infectious_time) 
 
     def get_stage(self):
