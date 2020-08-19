@@ -7,7 +7,7 @@ class Simulator:
         self.time = 0
         self.time_end = 5000
         self.timestep = 0.25 
-        self.agents = Agents(spec) 
+        self.agents = Agents(spec, self.time)  
         self.prev_NS = self.agents.get_num("S")
         self.prev_NE = self.agents.get_num("E")
         self.prev_NI = self.agents.get_num("I")
@@ -32,7 +32,10 @@ class Simulator:
         self.store_to_table()
 
         while(self.time <= self.time_end and self.agents.get_num("E")+ self.agents.get_num("I") > 0):
-            self.agents.step(self.timestep)
+            if (self.time%7 < self.timestep):
+                self.agents.new_p_factor()  
+
+            self.agents.step(self.time, self.timestep)
 
             if (self.prev_NS != self.agents.get_num("S") or \
                 self.prev_NI != self.agents.get_num("I") or \
