@@ -77,15 +77,14 @@ class Agents(object):
             if uniform < risk:
                 self.move_individual(agent, "E")
 
-    def get_group_in_stage(self, group_name, stage_name):
+    def get_num(self, stage, group_name=None):
+        if group_name == None:
+            return len(self.agents[stage])
         counter = 0
-        for agent in self.agents[stage_name]:
+        for agent in self.agents[stage]:
             if agent["group_name"] == group_name:
                 counter += 1 
-        return counter 
-
-    def __getitem__(self, key):
-        return len(self.agents[key])
+        return counter  
 
     def __str__(self):
         string = ""
