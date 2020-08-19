@@ -47,6 +47,8 @@ class Agents(object):
         elif (stage == "I"): 
             agent["time_until"] = erlang(3, agent["Ti"]/3) 
 
+    def new_p_factor(self): 
+        self.p_factor = random.uniform(0.5, 1.5) 
 
     def move_agent(self, agent, dst_stage):
         src_stage = agent["stage"] 
@@ -72,8 +74,9 @@ class Agents(object):
         # loop through suseptible and check their if any gets infected 
         for agent in self.agents["S"]:
             uniform = random.random() 
+            p = agent["p"]*self.p_factor 
             # dt*NI*ln(1-p) 
-            risk = 1 - math.exp(timestep * NI * math.log(1-agent["p"]))
+            risk = 1 - math.exp(timestep * NI * math.log(1-p))
             if uniform < risk:
                 self.move_agent(agent, "E")
 
