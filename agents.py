@@ -48,7 +48,7 @@ class Agents(object):
             agent["time_until"] = erlang(3, agent["Ti"]/3) 
 
 
-    def move_individual(self, agent, dst_stage):
+    def move_agent(self, agent, dst_stage):
         src_stage = agent["stage"] 
         self.agents[src_stage].remove(agent)
         self.agents[dst_stage].append(agent)
@@ -61,13 +61,13 @@ class Agents(object):
         for agent in self.agents["I"]:
             agent["time_until"] -= timestep
             if (agent["time_until"] < 0):
-                self.move_individual(agent, "R") 
+                self.move_agent(agent, "R") 
 
         # loop through exposed agents 
         for agent in self.agents["E"]:
             agent["time_until"] -= timestep
             if (agent["time_until"] < 0):
-                self.move_individual(agent, "I") 
+                self.move_agent(agent, "I") 
 
         # loop through suseptible and check their if any gets infected 
         for agent in self.agents["S"]:
@@ -75,17 +75,16 @@ class Agents(object):
             # dt*NI*ln(1-p) 
             risk = 1 - math.exp(timestep * NI * math.log(1-agent["p"]))
             if uniform < risk:
-                self.move_individual(agent, "E")
+                self.move_agent(agent, "E")
 
-    def get_group_in_stage(self, group_name, stage_name):
+    def get_num(self, stage, group_name=None):
+        if group_name == None:
+            return len(self.agents[stage])
         counter = 0
-        for agent in self.agents[stage_name]:
+        for agent in self.agents[stage]:
             if agent["group_name"] == group_name:
                 counter += 1 
-        return counter 
-
-    def __getitem__(self, key):
-        return len(self.agents[key])
+        return counter  
 
     def __str__(self):
         string = ""
