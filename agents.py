@@ -1,5 +1,16 @@
-from agent import *
 import math 
+from prob import *
+
+defaults = { 
+    "p": 1/7500, 
+    "Te": 5, 
+    "Ti": 15, 
+    "group_name": "noname" 
+}
+get_attr = lambda dct, key: dct[key] if key in dct else defaults[key]   
+
+# S -> E -> I -> R
+stages = ["S", "E", "I", "R"]
 
 
 class Agents(object):
@@ -7,79 +18,80 @@ class Agents(object):
         self.agents = {} 
         self.num_agents = 0 
         for stage in stages:
-            self.agents[stage.name] = [] 
+            # create list for each stage 
+            self.agents[stage] = []
 
         for spec in specs:
             for i in range(spec["amount"]):
-                self.add_agent(spec)  
-
-    def reset(self):
-        temp_agents = {} 
-        for stage in stages:
-            temp_agents[stage.name] = [] 
-
-        for stage in stages:
-            agts = self.agents[stage.name]
-            for agent in agts:
-                agent.reset()
-                init_stage = agent.get_stage()
-                temp_agents[init_stage.name].append(agent) 
-        self.agents = temp_agents 
+                self.add_agent(spec)
 
     def add_agent(self, spec):
-        p = None 
-        if "p" in spec:
-            p = spec["p"]
-        new_agent = Agent(self.num_agents, spec)
+        new_agent = {
+            "id":           self.num_agents,
+            "init_stage":   spec["init_stage"],
+            "stage":        spec["init_stage"],
+            "time_until":   None,
+            "group_name":   get_attr(spec, "group_name"),
+            "p":            get_attr(spec, "p"),
+            "Te":           get_attr(spec, "Te"),
+            "Ti":           get_attr(spec, "Ti")
+        }
+        self.set_stage(new_agent, spec["init_stage"]) 
         self.agents[spec["init_stage"]].append(new_agent)
         self.num_agents += 1 
 
-    def move_individual(self, inv, dst_stage):
-        src_stage = inv.stage
-        self.agents[src_stage.name].remove(inv)
-        self.agents[dst_stage.name].append(inv)
-        inv.set_stage(dst_stage) 
+    def set_stage(self, agent, stage):
+        agent["stage"] = stage 
+        if (stage == "E"):
+            agent["time_until"] = expo(agent["Te"])
+        elif (stage == "I"): 
+            agent["time_until"] = erlang(3, agent["Ti"]/3) 
+
+
+    def move_individual(self, agent, dst_stage):
+        src_stage = agent["stage"] 
+        self.agents[src_stage].remove(agent)
+        self.agents[dst_stage].append(agent)
+        self.set_stage(agent, dst_stage) 
 
     def step(self, timestep):
         NI = len(self.agents["I"])
 
         # loop through infectious and check if any become removed 
-        for inv in self.agents["I"]:
-            inv.reduce_time_until(timestep) 
-            until = inv.get_time_until()
-            if (type(until) is float and until < 0):
-                self.move_individual(inv, stages.R) 
+        for agent in self.agents["I"]:
+            agent["time_until"] -= timestep
+            if (agent["time_until"] < 0):
+                self.move_individual(agent, "R") 
 
         # loop through exposed agents 
-        for inv in self.agents["E"]:
-            inv.reduce_time_until(timestep)
-            until = inv.get_time_until()
-            if (type(until) is float and until < 0):
-                self.move_individual(inv, stages.I) 
-
+        for agent in self.agents["E"]:
+            agent["time_until"] -= timestep
+            if (agent["time_until"] < 0):
+                self.move_individual(agent, "I") 
 
         # loop through suseptible and check their if any gets infected 
-        for inv in self.agents["S"]:
-            rand = random.random()
-            risk = 1 - math.exp(timestep * NI * math.log(1-inv.p))
-            if rand < risk:
-                self.move_individual(inv, stages.E)  
+        for agent in self.agents["S"]:
+            uniform = random.random() 
+            # dt*NI*ln(1-p) 
+            risk = 1 - math.exp(timestep * NI * math.log(1-agent["p"]))
+            if uniform < risk:
+                self.move_individual(agent, "E")
 
     def get_group_in_stage(self, group_name, stage_name):
         counter = 0
-        for inv in self.agents[stage_name]:
-            if inv.group_name == group_name:
+        for agent in self.agents[stage_name]:
+            if agent["group_name"] == group_name:
                 counter += 1 
         return counter 
 
     def __getitem__(self, key):
-        return len(self.agents[key]) 
+        return len(self.agents[key])
 
     def __str__(self):
         string = ""
         for stage in stages:
-            num = len(self.agents[stage.name])
-            string += "{}: {}, \t".format(stage.name, num)
+            num = len(self.agents[stage])
+            string += "{}: {}, \t".format(stage, num)
         return string 
 
 
