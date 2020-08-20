@@ -1,5 +1,6 @@
 import math 
 from prob import *
+from authority import * 
 
 defaults = { 
     "p": 1/7500, 
@@ -24,6 +25,8 @@ class Agents(object):
         for spec in specs:
             for i in range(spec["amount"]):
                 self.add_agent(spec, time)
+
+        self.authority = Authority(self.num_agents) 
 
     def add_agent(self, spec, time): 
         new_agent = {
@@ -59,6 +62,8 @@ class Agents(object):
     def step(self, time, timestep):
         NI = len(self.agents["I"])
 
+        self.authority.step(time, timestep, len(self.agents["I"]))
+
         if (time%7 < timestep):
             self.new_p_factor()  
 
@@ -75,8 +80,7 @@ class Agents(object):
         # loop through suseptible and check their if any gets infected 
         for agent in self.agents["S"]:
             uniform = random.random() 
-            p = agent["p"]*self.p_factor 
-            # dt*NI*ln(1-p) 
+            p = agent["p"] * self.p_factor * self.authority.get_p_factor() 
             risk = 1 - math.exp(timestep * NI * math.log(1-p))
             if uniform < risk:
                 self.move_agent(agent, "E", time) 
