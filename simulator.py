@@ -11,7 +11,11 @@ class Simulator:
     def __init__(self, specs): 
         self.time = 0
         self.timestep = 0.25 
+        # keep track of how many individuals in each stage to save on computation time 
+        self.sizes = { "S": 0, "E": 0, "I": 0, "R": 0 } 
+        # list of all agents 
         self.agents = []
+        # save data for each time step 
         self.save = False 
         self.table = pd.DataFrame(columns = ['time', 'S', 'E', 'I', 'R'])
 
@@ -25,6 +29,7 @@ class Simulator:
         new_agent = Agent(len(self.agents), spec, self.time)  
         new_agent.set_stage(spec["init_stage"], self.time) 
         self.agents.append(new_agent)
+        self.sizes[spec["init_stage"]] += 1 
 
     def new_p_factor(self): 
         self.p_factor = random.uniform(0.5, 1.5)  
@@ -61,23 +66,21 @@ class Simulator:
             self.new_p_factor()  
 
         for agent in self.agents:
+            pre_stage = agent.get_stage() 
             agent.step(self.time, self.timestep, NI, self.p_factor, self.authority) 
-
+            post_stage = agent.get_stage() 
+            if (pre_stage != post_stage):
+                self.sizes[pre_stage]  -= 1
+                self.sizes[post_stage] += 1
 
     def get_all_num(self):
-        counters = { "S": 0, "E": 0, "I": 0, "R": 0 }
-        for agent in self.agents:
-            counters[agent.get_stage()] += 1
-        return counters 
+        return self.sizes 
 
     def get_num(self, stage, group_name=None):
-        counter = 0
         if group_name == None:
-            for agent in self.agents:
-                if (agent.get_stage() == stage):
-                    counter += 1 
-            return counter 
+            return self.sizes[stage] 
         else:
+            counter = 0
             for agent in self.agents:
                 if agent.get_stage() == stage:
                     if agent.get_group_name() == group_name:
