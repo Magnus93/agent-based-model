@@ -5,6 +5,8 @@ import pandas as pd
 import time 
 from aux_funtions import * 
 from prob import * 
+import matplotlib.pyplot as plt 
+
 
 filename = "agent-based"
 N_sim = 100 
@@ -65,3 +67,8 @@ if __name__ == "__main__":
             except:
                 n += 1
     print("result saved as: {}".format(filename))
+
+    plt.hist(table["Epidemic"].tolist(), bins=3)
+    plt.show() 
+
+
