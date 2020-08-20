@@ -31,14 +31,13 @@ if __name__ == "__main__":
         ]
         sim = Simulator(specs) 
 
-        sim.run(print_every=False, print_end=False)
-        results = sim.get_results()
+        sim.run(print_every=False)
 
         table.loc[len(table)] = [
-            results["duration"], 
-            results["epidemic"],
-            results["R"]["high_risk"],
-            results["R"]["low_risk"]
+            sim.time,
+            sim.get_num("R"),
+            sim.get_num("R", "high_risk"),
+            sim.get_num("R", "low_risk")
         ] 
 
         if i%print_every == 0 and i != 0:

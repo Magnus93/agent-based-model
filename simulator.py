@@ -1,60 +1,92 @@
-from agents import * 
-import pandas as pd  
+import math 
+import pandas as pd
 import matplotlib.pyplot as plt 
+from prob import *
+from authority import * 
+from agent import * 
+
+
 
 class Simulator:
-    def __init__(self, spec): 
+    def __init__(self, specs): 
         self.time = 0
-        self.time_end = 5000
         self.timestep = 0.25 
-        self.agents = Agents(spec, self.time)  
-        self.prev_NS = self.agents.get_num("S")
-        self.prev_NE = self.agents.get_num("E")
-        self.prev_NI = self.agents.get_num("I")
-        self.prev_NR = self.agents.get_num("R")
-        self.save_data = False 
-        self.table = pd.DataFrame(columns = ['time', 'S', 'E', 'I', 'R']) 
-        
-    def set_save_data(self, on):
-        self.save_data = on 
+        self.agents = []
+        self.save = False 
+        self.table = pd.DataFrame(columns = ['time', 'S', 'E', 'I', 'R'])
 
-    def store_to_table(self):
-        if self.save_data:
-            self.table.loc[len(self.table)] = [
-                self.time,
-                self.agents.get_num("S"),
-                self.agents.get_num("E"),
-                self.agents.get_num("I"),
-                self.agents.get_num("R")
-            ]
-    
-    def run(self, print_every=True, print_end=True):
-        self.store_to_table()
+        for spec in specs:
+            for i in range(spec["amount"]):
+                self.add_agent(spec)
 
-        while(self.time <= self.time_end and self.agents.get_num("E")+ self.agents.get_num("I") > 0):
-            self.agents.step(self.time, self.timestep)
+        self.authority = Authority(len(self.agents)) 
 
-            self.store_to_table() 
+    def add_agent(self, spec): 
+        new_agent = Agent(len(self.agents), spec, self.time)  
+        new_agent.set_stage(spec["init_stage"], self.time) 
+        self.agents.append(new_agent)
 
-            if (self.prev_NS != self.agents.get_num("S") or \
-                self.prev_NI != self.agents.get_num("I") or \
-                self.prev_NI != self.agents.get_num("I") or \
-                self.prev_NR != self.agents.get_num("R")):    
-                if (print_every):
-                    print(self)
-            self.prev_NS = self.agents.get_num("S")
-            self.prev_NE = self.agents.get_num("E")
-            self.prev_NI = self.agents.get_num("I")
-            self.prev_NR = self.agents.get_num("R")
+    def new_p_factor(self): 
+        self.p_factor = random.uniform(0.5, 1.5)  
 
+    def store_simulation(self, save_bool=True):
+        self.save = save_bool
+
+    def store_time(self):
+        nums = self.get_all_num()
+        self.table.loc[len(self.table)] = [
+            self.time,
+            nums["S"],
+            nums["E"],
+            nums["I"],
+            nums["R"]
+        ]
+
+    def run(self, print_every=True):
+        while (self.get_num("E")+self.get_num("I") > 0):
+            self.step() 
+            if (print_every):
+                print(self) 
+            if (self.save):
+                self.store_time()
             self.time += self.timestep 
 
-        self.store_to_table()
-        if (print_end):
-            print("FINAL: \t"+str(self))
-            print("==================")
-            print("Duration: {} days \nEpidemic size: {}".format(self.time, self.agents.get_num("R")))
-            
+
+    def step(self):
+        NI = self.get_num("I") 
+
+        self.authority.step(self.time, self.timestep, NI)
+
+        if (self.time%7 < self.timestep):
+            self.new_p_factor()  
+
+        for agent in self.agents:
+            agent.step(self.time, self.timestep, NI, self.p_factor, self.authority) 
+
+
+    def get_all_num(self):
+        counters = { "S": 0, "E": 0, "I": 0, "R": 0 }
+        for agent in self.agents:
+            counters[agent.get_stage()] += 1
+        return counters 
+
+    def get_num(self, stage, group_name=None):
+        counter = 0
+        if group_name == None:
+            for agent in self.agents:
+                if (agent.get_stage() == stage):
+                    counter += 1 
+            return counter 
+        else:
+            for agent in self.agents:
+                if agent.get_stage() == stage:
+                    if agent.get_group_name() == group_name:
+                        counter += 1 
+            return counter  
+
+    def __str__(self):
+        return "time = "+str(self.time)+":\t"+str(self.get_all_num())
+
     def plot(self):
         plt.plot( \
             self.table["time"].tolist(), self.table["S"].tolist(), "g-",\
@@ -67,31 +99,16 @@ class Simulator:
         plt.ylabel("agents") 
         plt.show() 
 
-
-    def export_table(self):
-        self.table.to_csv("simulation_result.csv")
-
-    def __str__(self):
-        return "t = {}:\t agents = {}".format(self.time, self.agents)
-
-    def get_results(self):
-        return { 
-            "duration": self.time , 
-            "epidemic": self.agents.get_num("R"),
-            "R": {
-                "high_risk": self.agents.get_num("R", "high_risk"),
-                "low_risk": self.agents.get_num("R", "low_risk")
-            }
-        }
-
 if __name__ == "__main__":
-    
     specs = [
-    {"amount": 500, "init_stage": "S", "p": 1/5000, "group_name": "high_risk"}, 
-    {"amount": 500, "init_stage": "S", "p": 1/15000, "group_name": "low_risk"}, 
-    {"amount": 1, "init_stage": "E"}
+        {"amount": 500, "init_stage": "S", "p": 1/5000, "group_name": "high_risk"}, 
+        {"amount": 500, "init_stage": "S", "p": 1/15000, "group_name": "low_risk"}, 
+        {"amount": 1, "init_stage": "E"}
     ]
-    sim = Simulator(specs)
-    sim.set_save_data(True)
-    sim.run() 
-    sim.plot() 
+    sim = Simulator(specs)  
+    sim.store_simulation(True) 
+    sim.run(print_every=False)
+    print(sim)
+    print("number of REMOVED high risk {}".format(sim.get_num("R", "high_risk")))
+    print("number of REMOVED low risk {}".format(sim.get_num("R", "low_risk")))
+    sim.plot()
