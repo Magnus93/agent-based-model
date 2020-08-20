@@ -16,8 +16,10 @@ class Authority:
             self.delay = random.triangular(3, 7, 5)
 
         if ( 7-self.delay <= time%7 < 7-self.delay+timestep ):
-            print("authority esitmation day: {}".format(time%7))
-            self.est_infectious = I 
+            # print("authority esitmation day: {}".format(time%7))
+            sigma = 0.25
+            bias = max(0, random.normalvariate(1, 0.25))
+            self.est_infectious = int(I*bias) 
             if (self.est_infectious > 0.1*self.pop_size):
                 self.p_factor = 0.5 
             else:
