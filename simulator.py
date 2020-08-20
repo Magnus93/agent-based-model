@@ -32,9 +32,6 @@ class Simulator:
         self.store_to_table()
 
         while(self.time <= self.time_end and self.agents.get_num("E")+ self.agents.get_num("I") > 0):
-            if (self.time%7 < self.timestep):
-                self.agents.new_p_factor()  
-
             self.agents.step(self.time, self.timestep)
 
             if (self.prev_NS != self.agents.get_num("S") or \

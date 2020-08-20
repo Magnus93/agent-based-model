@@ -59,6 +59,9 @@ class Agents(object):
     def step(self, time, timestep):
         NI = len(self.agents["I"])
 
+        if (self.time%7 < self.timestep):
+            self.agents.new_p_factor()  
+
         # loop through infectious and check if any become removed 
         for agent in self.agents["I"]:
             if (agent["time_to_leave"] < time):
