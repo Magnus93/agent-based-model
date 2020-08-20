@@ -1,105 +1,58 @@
 import math 
 from prob import *
 from authority import * 
-
-defaults = { 
-    "p": 1/7500, 
-    "Te": 5, 
-    "Ti": 15, 
-    "group_name": "noname" 
-}
-get_attr = lambda dct, key: dct[key] if key in dct else defaults[key]   
-
-# S -> E -> I -> R
-stages = ["S", "E", "I", "R"]
-
+from agent import * 
 
 class Agents(object):
     def __init__(self, specs, time): 
-        self.agents = {} 
-        self.num_agents = 0 
-        for stage in stages:
-            # create list for each stage 
-            self.agents[stage] = []
+        self.agents = []  
 
         for spec in specs:
             for i in range(spec["amount"]):
                 self.add_agent(spec, time)
 
-        self.authority = Authority(self.num_agents) 
+        self.authority = Authority(len(self.agents)) 
 
     def add_agent(self, spec, time): 
-        new_agent = {
-            "id":           self.num_agents,
-            "init_stage":   spec["init_stage"],
-            "stage":        spec["init_stage"],
-            "time_to_leave":None, 
-            "group_name":   get_attr(spec, "group_name"),
-            "p":            get_attr(spec, "p"),
-            "Te":           get_attr(spec, "Te"),
-            "Ti":           get_attr(spec, "Ti")
-        }
-        self.set_stage(new_agent, spec["init_stage"], time) 
-        self.agents[spec["init_stage"]].append(new_agent)
-        self.num_agents += 1 
-
-    def set_stage(self, agent, stage, time): 
-        agent["stage"] = stage 
-        if (stage == "E"):
-            agent["time_to_leave"] = time + expo(agent["Te"])
-        elif (stage == "I"): 
-            agent["time_to_leave"] = time + erlang(3, agent["Ti"]/3) 
+        new_agent = Agent(len(self.agents), spec, time)  
+        new_agent.set_stage(spec["init_stage"], time) 
+        self.agents.append(new_agent)
 
     def new_p_factor(self): 
-        self.p_factor = random.uniform(0.5, 1.5) 
-
-    def move_agent(self, agent, dst_stage, time):
-        src_stage = agent["stage"] 
-        self.agents[src_stage].remove(agent)
-        self.agents[dst_stage].append(agent)
-        self.set_stage(agent, dst_stage, time)  
+        self.p_factor = random.uniform(0.5, 1.5)  
 
     def step(self, time, timestep):
-        NI = len(self.agents["I"])
+        NI = self.get_num("I") 
 
-        self.authority.step(time, timestep, len(self.agents["I"]))
+        self.authority.step(time, timestep, NI)
 
         if (time%7 < timestep):
             self.new_p_factor()  
 
-        # loop through infectious and check if any become removed 
-        for agent in self.agents["I"]:
-            if (agent["time_to_leave"] < time):
-                self.move_agent(agent, "R", time)  
 
-        # loop through exposed agents 
-        for agent in self.agents["E"]:
-            if (agent["time_to_leave"] < time): 
-                self.move_agent(agent, "I", time)  
-
-        # loop through suseptible and check their if any gets infected 
-        for agent in self.agents["S"]:
-            uniform = random.random() 
-            p = agent["p"] * self.p_factor * self.authority.get_p_factor() 
-            risk = 1 - math.exp(timestep * NI * math.log(1-p))
-            if uniform < risk:
-                self.move_agent(agent, "E", time) 
+        for agent in self.agents:
+            agent.step(time, timestep, NI, self.p_factor, self.authority) 
 
     def get_num(self, stage, group_name=None):
-        if group_name == None:
-            return len(self.agents[stage])
         counter = 0
-        for agent in self.agents[stage]:
-            if agent["group_name"] == group_name:
-                counter += 1 
-        return counter  
+        if group_name == None:
+            for agent in self.agents:
+                if (agent.get_stage() == stage):
+                    counter += 1 
+            return counter 
+        else:
+            for agent in self.agents:
+                if self.agents.get_stage() == stage:
+                    if agent.get_group_name() == group_name:
+                        counter += 1 
+            return counter  
 
     def __str__(self):
-        string = ""
-        for stage in stages:
-            num = len(self.agents[stage])
-            string += "{}: {}, \t".format(stage, num)
-        return string 
+        counters = { "S": 0, "E": 0, "I": 0, "R": 0 }
+        for agent in self.agents:
+            counters[agent.get_stage()] += 1
+            
+        return str(counters)
 
 
 if __name__ == "__main__":
