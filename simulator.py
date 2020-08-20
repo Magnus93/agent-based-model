@@ -1,6 +1,6 @@
 from agents import * 
 import pandas as pd  
-
+import matplotlib.pyplot as plt 
 
 class Simulator:
     def __init__(self, spec): 
@@ -22,10 +22,10 @@ class Simulator:
         if self.save_data:
             self.table.loc[len(self.table)] = [
                 self.time,
-                self.agents["S"],
-                self.agents["E"],
-                self.agents["I"],
-                self.agents["R"]
+                self.agents.get_num("S"),
+                self.agents.get_num("E"),
+                self.agents.get_num("I"),
+                self.agents.get_num("R")
             ]
     
     def run(self, print_every=True, print_end=True):
@@ -34,11 +34,12 @@ class Simulator:
         while(self.time <= self.time_end and self.agents.get_num("E")+ self.agents.get_num("I") > 0):
             self.agents.step(self.time, self.timestep)
 
+            self.store_to_table() 
+
             if (self.prev_NS != self.agents.get_num("S") or \
                 self.prev_NI != self.agents.get_num("I") or \
                 self.prev_NI != self.agents.get_num("I") or \
-                self.prev_NR != self.agents.get_num("R")):
-                self.store_to_table() 
+                self.prev_NR != self.agents.get_num("R")):    
                 if (print_every):
                     print(self)
             self.prev_NS = self.agents.get_num("S")
@@ -53,7 +54,20 @@ class Simulator:
             print("FINAL: \t"+str(self))
             print("==================")
             print("Duration: {} days \nEpidemic size: {}".format(self.time, self.agents.get_num("R")))
-    
+            
+    def plot(self):
+        plt.plot( \
+            self.table["time"].tolist(), self.table["S"].tolist(), "g-",\
+            self.table["time"].tolist(), self.table["E"].tolist(), "m-",\
+            self.table["time"].tolist(), self.table["I"].tolist(), "r-",\
+            self.table["time"].tolist(), self.table["R"].tolist(), "b-",\
+        )
+        plt.legend(["S", "E", "I", "R"])
+        plt.xlabel("time")
+        plt.ylabel("agents") 
+        plt.show() 
+
+
     def export_table(self):
         self.table.to_csv("simulation_result.csv")
 
@@ -78,4 +92,6 @@ if __name__ == "__main__":
     {"amount": 1, "init_stage": "E"}
     ]
     sim = Simulator(specs)
+    sim.set_save_data(True)
     sim.run() 
+    sim.plot() 
