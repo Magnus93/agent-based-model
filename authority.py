@@ -7,15 +7,15 @@ class Authority:
         self.est_infectious = 0 
         # poulation size 
         self.pop_size = population_size 
-        # day 
-        self.info_weekday = 0 
+        # delay 
+        self.delay = 7  
 
 
     def step(self, time, timestep, I):
         if (time%7 < timestep):
-            self.info_weekday = random.triangular(3, 7, 5)
+            self.delay = random.triangular(3, 7, 5)
 
-        if ( 7-self.info_weekday <= time%7 < 7-self.info_weekday+timestep ):
+        if ( 7-self.delay <= time%7 < 7-self.delay+timestep ):
             print("authority esitmation day: {}".format(time%7))
             self.est_infectious = I 
             if (self.est_infectious > 0.1*self.pop_size):
