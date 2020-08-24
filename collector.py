@@ -1,43 +1,61 @@
 # collects results from multible simulations 
 from simulator import * 
 import random 
+import math 
 import pandas as pd 
+import statistics
 import time 
 from aux_funtions import * 
 from prob import * 
 import matplotlib.pyplot as plt 
 
 
-filename = "agent-based"
-N_sim = 100 
+filename = "agent-based-stats"
+N_sim = 1000  
 print_every = 10
 
 NS = 1000 
+epidemic_limit = 0.1*NS 
+
+skip_if_no_epidemic = False 
 
 # Create the pandas DataFrame 
 table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'Removed high risk', 'Removed low risk']) 
-data = pd.DataFrame() 
-
 
 if __name__ == "__main__": 
     start_time = time.time()
     
-    for i in range(N_sim):
+    # count the number of replications 
+    i = 0  
+    skipped = 0 
+    below_epidemic_limit = 0 
+
+    while i < N_sim:
         N_high = binomial(NS, 0.5) 
+        N_low = NS - N_high
         specs = [
             {"amount": N_high, "init_stage": "S", "p": 1/5000,  "group_name": "high_risk" }, 
-            {"amount": NS-N_high, "init_stage": "S", "p": 1/15000, "group_name": "low_risk" }, 
+            {"amount": N_low, "init_stage": "S", "p": 1/15000, "group_name": "low_risk" }, 
             {"amount": 1, "init_stage": "E"}
         ]
         sim = Simulator(specs) 
 
         sim.run(print_every=False)
 
+        epidemic_size = NS - sim.get_num("S") 
+        if (epidemic_size < epidemic_limit):
+            below_epidemic_limit += 1  
+
+        if (skip_if_no_epidemic and epidemic_size < epidemic_limit):
+            skipped += 1  
+        else:
+            i += 1 
+
         table.loc[len(table)] = [
             sim.time,
-            sim.get_num("R"),
-            sim.get_num("R", "high_risk"),
-            sim.get_num("R", "low_risk")
+            epidemic_size,  
+            N_high - sim.get_num("S", "high_risk"),
+            N_low - sim.get_num("S", "low_risk") 
         ] 
 
         if i%print_every == 0 and i != 0:
@@ -45,22 +63,48 @@ if __name__ == "__main__":
             eta =  time_past*(N_sim - i) / i   
             print("iteration {}, \t eta: {}".format(i, sec_to_str(eta)))
 
-    
+    stats = pd.DataFrame(columns = [
+        'Measurement', 'mean', 'Std. Dev', 'Conf. Int (avg)', 'Min', 'Max', 
+    ])
+
+    mean = statistics.mean(table['Duration'].tolist()) 
+    stdev = statistics.stdev(table['Duration'].tolist())
+    sterror = stdev / math.sqrt(N_sim-1) 
+    stats.loc[len(stats)] = [
+        'Duration',
+        mean,
+        stdev,
+        str(mean-sterror)+"  -  "+str(mean+sterror),
+        min(table['Duration'].tolist()),
+        max(table['Duration'].tolist()),
+    ]
+
+    mean = statistics.mean(table['Epidemic'].tolist()) 
+    standard_dev = statistics.stdev(table['Epidemic'].tolist())
+    standard_error = standard_dev / math.sqrt(N_sim-1) 
+    stats.loc[len(stats)] = [
+        'Epidemic',
+        mean,
+        stdev,
+        str(mean-sterror)+"  -  "+str(mean+sterror),
+        min(table['Epidemic'].tolist()),
+        max(table['Epidemic'].tolist()),
+    ]
+
     exec_time = time.time() - start_time
     print("####### Collection DONE #######")
     print("Exec. time: \t{}".format(sec_to_str(exec_time)))
     print("num. repl.: \t{}".format(N_sim))
-    # sort table by epidemic size 
-    table = table.sort_values(by="Epidemic")
+    print("Replications without epidemics: \t{}".format(below_epidemic_limit)) 
     try:
-        table.to_csv(filename+".csv")
+        stats.to_csv(filename+".csv")
     except:
         n = 1
         success = False 
         while not success:
             print("unsuccesful print "+str(n))
             try:
-                table.to_csv(filename + str(n) + ".csv")
+                stats.to_csv(filename + str(n) + ".csv")
                 success = True 
                 filename = filename + str(n) + ".csv"
             except:
