@@ -41,7 +41,7 @@ class Agent:
     def step(self, time, timestep, NI, p_factor, authority):
         if (self.stage == "S"):
             uniform = random.random()
-            p = self.p * p_factor * authority.p_factor
+            p = self.p * p_factor * authority.get_p_factor() 
             risk = 1 - math.exp(timestep * NI * math.log(1-p))
             if uniform < risk:
                 self.set_stage("E", time)  
