@@ -1,4 +1,5 @@
 import pandas as pd 
+import numpy as np 
 
 def sec_to_str(seconds):
     m = int(seconds//60)
@@ -25,3 +26,11 @@ def save_pandas_dataframe_as_csv(df, filename):
             except:
                 n += 1
     return print(str(filename)+".csv") 
+
+
+def get_cdf(list_of_values):
+    list_of_values.sort()
+    values = np.array(list_of_values) 
+    values = np.cumsum(values) / np.sum(values)
+
+    return values.tolist() 
