@@ -3,20 +3,23 @@ from simulator import *
 import random 
 import math 
 import pandas as pd 
+import sys
 import statistics
 import time 
 from aux_funtions import * 
 from prob import * 
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt  
 
 
-N_sim = 1000 
+N_sim = 30
+if len(sys.argv) >= 2:
+    N_sim = int(sys.argv[1]) 
 print_every = 10
 
 NS = 1000 
 epidemic_limit = 0.1*NS 
 
-skip_if_no_epidemic = True  
+skip_if_no_epidemic = False   
 
 # Create the pandas DataFrame 
 table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'Removed high risk', 'Removed low risk']) 
@@ -95,11 +98,13 @@ if __name__ == "__main__":
     print("num. repl.: \t{}".format(N_sim))
     print("Skipped replications: \t{}".format(skipped)) 
     print("Replications without epidemics: \t{}".format(below_epidemic_limit)) 
-    save_pandas_dataframe_as_csv(table.sort_values(by="Epidemic"), "agent-based-table")
-    save_pandas_dataframe_as_csv(stats, "agent-based-stats")
-    print("result saved as: {}".format(filename))
+    filename = save_pandas_dataframe_as_csv(table.sort_values(by="Epidemic"), "agent-based-table")
+    print("Table saved as: {}".format(filename))
+    filename = save_pandas_dataframe_as_csv(stats, "agent-based-stats")
+    print("Stats saved as: {}".format(filename))
 
-    plt.hist(table["Epidemic"].tolist(), bins=10)
+    # plt.hist(table["Epidemic"].tolist(), bins=10)
+    plt.plot(get_cdf(table["Epidemic"].tolist()))
     plt.show() 
 
 
