@@ -25,7 +25,7 @@ def save_pandas_dataframe_as_csv(df, filename):
                 filename = filename + str(n) + ".csv"
             except:
                 n += 1
-    return print(str(filename)+".csv") 
+    return str(filename)+".csv" 
 
 
 def get_pdf(list_of_values):
@@ -34,7 +34,5 @@ def get_pdf(list_of_values):
 
 def get_cdf(list_of_values):
     list_of_values.sort()
-    values = np.array(list_of_values) 
-    values = np.cumsum(values) / np.sum(values)
-
+    values = np.array(range(1,len(list_of_values)+1))/len(list_of_values) 
     return values.tolist() 
