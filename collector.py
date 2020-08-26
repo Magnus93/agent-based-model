@@ -3,7 +3,6 @@ from simulator import *
 import random 
 import math 
 import pandas as pd 
-import sys
 import statistics
 import time 
 from aux_funtions import * 
@@ -11,101 +10,115 @@ from prob import *
 import matplotlib.pyplot as plt  
 
 
-N_sim = 30
-if len(sys.argv) >= 2:
-    N_sim = int(sys.argv[1]) 
-print_every = 10
+class Collector:
+    def __init__(self): 
+        
+        # number of susceptibles at start 
+        self.NS = 1000
 
-NS = 1000 
-epidemic_limit = 0.1*NS 
+        self.epidemic_limit = 0.1*self.NS 
+        self.print_every = 10 
+        self.skip_non_epidemics = False
 
-skip_if_no_epidemic = False   
+        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'Removed high risk', 'Removed low risk'])
+        self.stats = pd.DataFrame(columns = ['Measurement', 'mean', 'Std. Dev', 'Conf. Int (avg)', 'Min', 'Max'])
+        self.density = pd.DataFrame(columns = ['PDF', 'CDF']) 
 
-# Create the pandas DataFrame 
-table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'Removed high risk', 'Removed low risk']) 
+        # count the number of replications 
+        self.i = 0  
+        self.skipped = 0 
+        self.below_epidemic_limit = 0 
 
-if __name__ == "__main__": 
-    start_time = time.time()
-    
-    # count the number of replications 
-    i = 0  
-    skipped = 0 
-    below_epidemic_limit = 0 
+    def set_skip_non_epidemics(bool_value):
+        self.skip_non_epidemics = bool_value  
 
-    while i < N_sim:
-        N_high = binomial(NS, 0.5) 
-        N_low = NS - N_high
+    def new_sim(self):
+        self.N_high = binomial(self.NS, 0.5) 
+        self.N_low = self.NS - self.N_high
         specs = [
-            {"amount": N_high, "init_stage": "S", "p": 1/5000,  "group_name": "high_risk" }, 
-            {"amount": N_low, "init_stage": "S", "p": 1/15000, "group_name": "low_risk" }, 
+            {"amount": self.N_high, "init_stage": "S", "p": 1/5000,  "group_name": "high_risk" }, 
+            {"amount": self.N_low, "init_stage": "S", "p": 1/15000, "group_name": "low_risk" }, 
             {"amount": 1, "init_stage": "E"}
         ]
-        sim = Simulator(specs) 
+        return Simulator(specs)  
 
+    def step(self):
+        sim = self.new_sim() 
         sim.run(print_every=False)
 
-        epidemic_size = NS - sim.get_num("S") 
+        epidemic_size = self.NS - sim.get_num("S")         
 
-        if (skip_if_no_epidemic and epidemic_size < epidemic_limit):
-            skipped += 1  
+        if (self.skip_non_epidemics and epidemic_size < self.epidemic_limit):
+            self.skipped += 1 
         else:
-            i += 1 
-            table.loc[len(table)] = [
+            self.i += 1 
+            self.table.loc[len(self.table)] = [
                 sim.time,
                 epidemic_size,  
-                N_high - sim.get_num("S", "high_risk"),
-                N_low - sim.get_num("S", "low_risk") 
+                self.N_high - sim.get_num("S", "high_risk"),
+                self.N_low - sim.get_num("S", "low_risk") 
             ] 
-            if (epidemic_size < epidemic_limit):
-                below_epidemic_limit += 1  
-
-        if i%print_every == 0 and i != 0:
-            time_past = time.time() - start_time 
-            eta =  time_past*(N_sim - i) / i   
-            print("iteration {}, \t eta: {}, \t skipped: {}".format(i, sec_to_str(eta), skipped))
-
-    stats = pd.DataFrame(columns = [
-        'Measurement', 'mean', 'Std. Dev', 'Conf. Int (avg)', 'Min', 'Max', 
-    ])
-
-    mean = statistics.mean(table['Duration'].tolist()) 
-    stdev = statistics.stdev(table['Duration'].tolist())
-    sterror = stdev / math.sqrt(N_sim-1) 
-    stats.loc[len(stats)] = [
-        'Duration',
-        mean,
-        stdev,
-        str(mean-sterror)+"  -  "+str(mean+sterror),
-        min(table['Duration'].tolist()),
-        max(table['Duration'].tolist()),
-    ]
-
-    mean = statistics.mean(table['Epidemic'].tolist()) 
-    stdev = statistics.stdev(table['Epidemic'].tolist())
-    sterror = stdev / math.sqrt(N_sim-1) 
-    stats.loc[len(stats)] = [
-        'Epidemic',
-        mean,
-        stdev,
-        str(mean-sterror)+"  -  "+str(mean+sterror),
-        min(table['Epidemic'].tolist()),
-        max(table['Epidemic'].tolist()),
-    ]
-
-    exec_time = time.time() - start_time
-    print("####### Collection DONE #######")
-    print("Exec. time: \t{}".format(sec_to_str(exec_time)))
-    print("num. repl.: \t{}".format(N_sim))
-    print("Skipped replications: \t{}".format(skipped)) 
-    print("Replications without epidemics: \t{}".format(below_epidemic_limit)) 
-    filename = save_pandas_dataframe_as_csv(table.sort_values(by="Epidemic"), "agent-based-table")
-    print("Table saved as: {}".format(filename))
-    filename = save_pandas_dataframe_as_csv(stats, "agent-based-stats")
-    print("Stats saved as: {}".format(filename))
-    filename = save_pandas_dataframe_as_csv(pd.DataFrame(data={ 'cdf': get_cdf(table["Epidemic"].tolist()) }), "agent-based-cdf")
-
-    # plt.hist(table["Epidemic"].tolist(), bins=10)
-    plt.plot(get_pdf(table["Epidemic"].tolist()), get_cdf(table["Epidemic"].tolist()))
-    plt.show() 
+            if (epidemic_size < self.epidemic_limit):
+                self.below_epidemic_limit += 1  
+            
+            if self.i%self.print_every == 0 and self.i != 0:
+                time_past = time.time() - self.start_time 
+                eta =  time_past*(self.num_reps - self.i) / self.i
+                print("iteration {}, \t eta: {}, \t skipped: {}".format(self.i, sec_to_str(eta), self.skipped))
 
 
+    def run(self, num_reps):
+        self.start_time = time.time()
+        self.num_reps = num_reps 
+        while self.i < self.num_reps:
+            self.step()
+        
+        mean = statistics.mean(self.table['Duration'].tolist()) 
+        stdev = statistics.stdev(self.table['Duration'].tolist())
+        sterror = stdev / math.sqrt(self.num_reps-1) 
+        self.stats.loc[0] = [
+            'Duration',
+            mean,
+            stdev,
+            str(mean-sterror)+"  -  "+str(mean+sterror),
+            min(self.table['Duration'].tolist()),
+            max(self.table['Duration'].tolist()),
+        ]
+
+        mean = statistics.mean(self.table['Epidemic'].tolist()) 
+        stdev = statistics.stdev(self.table['Epidemic'].tolist())
+        sterror = stdev / math.sqrt(self.num_reps-1) 
+        self.stats.loc[1] = [
+            'Epidemic',
+            mean,
+            stdev,
+            str(mean-sterror)+"  -  "+str(mean+sterror),
+            min(self.table['Epidemic'].tolist()),
+            max(self.table['Epidemic'].tolist()),
+        ]
+
+        self.density["PDF"] = get_pdf(self.table["Epidemic"].tolist())
+        self.density["CDF"] = get_cdf(self.table["Epidemic"].tolist()) 
+
+        exec_time = time.time() - self.start_time
+        print("####### Collection DONE #######")
+        print("Exec. time: \t{}".format(sec_to_str(exec_time)))
+        print("num. repl.: \t{}".format(self.i))
+        print("Skipped replications: \t{}".format(self.skipped)) 
+        print("Replications without epidemics: \t{}".format(self.below_epidemic_limit))
+        
+        filename = save_pandas_dataframe_as_csv(self.table.sort_values(by="Epidemic"), "agent-based-table-"+str(self.num_reps))
+        print("Table saved as: {}".format(filename))
+        filename = save_pandas_dataframe_as_csv(self.stats, "agent-based-stats-"+str(self.num_reps))
+        print("Stats saved as: {}".format(filename))
+        filename = save_pandas_dataframe_as_csv(self.density, "agent-based-density-"+str(self.num_reps))
+        print("Density saved as: {}".format(filename))
+
+if __name__ == "__main__":
+    import sys
+    num_reps = 30 
+    if len(sys.argv) >= 2:
+        num_reps = int(sys.argv[1])
+
+    collector = Collector()
+    collector.run(num_reps)
