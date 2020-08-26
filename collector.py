@@ -102,9 +102,10 @@ if __name__ == "__main__":
     print("Table saved as: {}".format(filename))
     filename = save_pandas_dataframe_as_csv(stats, "agent-based-stats")
     print("Stats saved as: {}".format(filename))
+    filename = save_pandas_dataframe_as_csv(pd.DataFrame(data={ 'cdf': get_cdf(table["Epidemic"].tolist()) }), "agent-based-cdf")
 
     # plt.hist(table["Epidemic"].tolist(), bins=10)
-    plt.plot(get_cdf(table["Epidemic"].tolist()))
+    plt.plot(get_pdf(table["Epidemic"].tolist()), get_cdf(table["Epidemic"].tolist()))
     plt.show() 
 
 

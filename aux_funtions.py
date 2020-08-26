@@ -28,6 +28,10 @@ def save_pandas_dataframe_as_csv(df, filename):
     return print(str(filename)+".csv") 
 
 
+def get_pdf(list_of_values):
+    list_of_values.sort()
+    return list_of_values 
+
 def get_cdf(list_of_values):
     list_of_values.sort()
     values = np.array(list_of_values) 
