@@ -22,7 +22,7 @@ class Collector:
 
         self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'Removed high risk', 'Removed low risk'])
         self.stats = pd.DataFrame(columns = ['Measurement', 'mean', 'Std. Dev', 'Conf. Int (avg)', 'Min', 'Max'])
-        self.density = pd.DataFrame(columns = ['PDF', 'CDF']) 
+        self.density = pd.DataFrame(columns = ['Range', 'PDF', 'CDF']) 
 
         # count the number of replications 
         self.i = 0  
@@ -97,8 +97,14 @@ class Collector:
             max(self.table['Epidemic'].tolist()),
         ]
 
-        self.density["PDF"] = get_pdf(self.table["Epidemic"].tolist())
-        self.density["CDF"] = get_cdf(self.table["Epidemic"].tolist()) 
+        bins = 20
+        minimum = 0
+        maximum = 1000 
+
+        hist = get_hist_pdf(self.table["Epidemic"].tolist(), bins, minimum, maximum)
+        self.density["Range"] = hist[1][:bins]
+        self.density["PDF"] = hist[0]
+        self.density["CDF"] = get_hist_cdf(self.table["Epidemic"].tolist(), bins, minimum, maximum) 
 
         exec_time = time.time() - self.start_time
         print("####### Collection DONE #######")
@@ -107,11 +113,11 @@ class Collector:
         print("Skipped replications: \t{}".format(self.skipped)) 
         print("Replications without epidemics: \t{}".format(self.below_epidemic_limit))
         
-        filename = save_pandas_dataframe_as_csv(self.table.sort_values(by="Epidemic"), "agent-based-table-"+str(self.num_reps))
+        filename = save_pandas_dataframe_as_csv(self.table.sort_values(by="Epidemic"), "abm-table-"+str(self.num_reps))
         print("Table saved as: {}".format(filename))
-        filename = save_pandas_dataframe_as_csv(self.stats, "agent-based-stats-"+str(self.num_reps))
+        filename = save_pandas_dataframe_as_csv(self.stats, "abm-stats-"+str(self.num_reps))
         print("Stats saved as: {}".format(filename))
-        filename = save_pandas_dataframe_as_csv(self.density, "agent-based-density-"+str(self.num_reps))
+        filename = save_pandas_dataframe_as_csv(self.density, "abm-density-"+str(self.num_reps)+"reps-"+str(bins)+"bins")
         print("Density saved as: {}".format(filename))
 
 if __name__ == "__main__":
