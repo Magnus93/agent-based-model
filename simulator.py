@@ -8,7 +8,7 @@ from agent import *
 
 
 class Simulator:
-    def __init__(self, specs): 
+    def __init__(self, pop_specs, uncertainty={ "param": True, "auth":True }): 
         self.time = 0
         self.timestep = 0.25 
         # keep track of how many individuals in each stage to save on computation time 
@@ -18,12 +18,13 @@ class Simulator:
         # save data for each time step 
         self.save = False 
         self.table = pd.DataFrame(columns = ['time', 'S', 'E', 'I', 'R'])
+        self.uncertainty = uncertainty 
 
-        for spec in specs:
+        for spec in pop_specs:
             for i in range(spec["amount"]):
                 self.add_agent(spec)
 
-        self.authority = Authority(len(self.agents)) 
+        self.authority = Authority(len(self.agents), self.uncertainty["auth"])  
 
     def add_agent(self, spec): 
         new_agent = Agent(len(self.agents), spec, self.time)  
@@ -32,7 +33,10 @@ class Simulator:
         self.sizes[spec["init_stage"]] += 1 
 
     def new_p_factor(self): 
-        self.p_factor = random.uniform(0.5, 1.5)  
+        if(self.uncertainty["param"]):
+            self.p_factor = random.uniform(0.5, 1.5)
+        else: 
+            self.p_factor = 1
 
     def store_simulation(self, save_bool=True):
         self.save = save_bool

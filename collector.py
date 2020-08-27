@@ -9,10 +9,10 @@ from aux_functions import *
 from prob import * 
 import matplotlib.pyplot as plt  
 
-
 class Collector:
-    def __init__(self): 
-        
+    def __init__(self, uncertainty): 
+        self.uncertainty = uncertainty 
+
         # number of susceptibles at start 
         self.NS = 1000
 
@@ -33,14 +33,18 @@ class Collector:
         self.skip_non_epidemics = bool_value  
 
     def new_sim(self):
-        self.N_high = binomial(self.NS, 0.5) 
+        if (self.uncertainty["init"]):
+            self.N_high = binomial(self.NS, 0.5) 
+        else:
+            self.N_high = int(self.NS/2) 
+        
         self.N_low = self.NS - self.N_high
-        specs = [
+        pop_specs = [
             {"amount": self.N_high, "init_stage": "S", "p": 1/5000,  "group_name": "high_risk" }, 
             {"amount": self.N_low, "init_stage": "S", "p": 1/15000, "group_name": "low_risk" }, 
             {"amount": 1, "init_stage": "E"}
         ]
-        return Simulator(specs)  
+        return Simulator(pop_specs, self.uncertainty)   
 
     def step(self):
         sim = self.new_sim() 
@@ -126,5 +130,5 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         num_reps = int(sys.argv[1])
 
-    collector = Collector()
+    collector = Collector(uncertainty={ "init":False, "param": False, "auth": False}) 
     collector.run(num_reps)
