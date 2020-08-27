@@ -9,8 +9,8 @@ defaults = {
 }
 get_attr = lambda dct, key: dct[key] if key in dct else defaults[key]   
 
-# S -> E -> I -> R
-stages = ["S", "E", "I", "R"]
+# S -> I -> R
+stages = ["S", "I", "R"]
 
 
 class Agent:
@@ -27,10 +27,8 @@ class Agent:
 
     def set_stage(self, new_stage, time):
         self.stage = new_stage 
-        if (new_stage == "E"):
-            self.time_to_leave = time + expo(self.Te)
-        elif (new_stage == "I"): 
-            self.time_to_leave = time + erlang(3, self.Ti/3) 
+        if (new_stage == "I"):
+            self.time_to_leave = time + expo(self.Ti)
 
     def get_stage(self):
         return self.stage 
@@ -38,18 +36,15 @@ class Agent:
     def get_group_name(self):
         return self.group_name 
 
-    def step(self, time, timestep, NI, p_factor, authority):
+    def step(self, time, timestep, NI):
         if (self.stage == "S"):
             uniform = random.random()
-            p = self.p * p_factor * authority.get_p_factor() 
+            p = self.p 
             risk = 1 - math.exp(timestep * NI * math.log(1-p))
-            if uniform < risk:
-                self.set_stage("E", time)  
-        elif (self.stage == "E"):
-            if (self.time_to_leave < time):
-                self.set_stage("I", time) 
+            if uniform <= risk:
+                self.set_stage("I", time)  
         elif (self.stage == "I"):
-            if (self.time_to_leave < time):
+            if (self.time_to_leave <= time):
                 self.set_stage("R", time) 
 
 

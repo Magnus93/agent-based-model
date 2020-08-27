@@ -10,9 +10,7 @@ from prob import *
 import matplotlib.pyplot as plt  
 
 class Collector:
-    def __init__(self, uncertainty): 
-        self.uncertainty = uncertainty 
-
+    def __init__(self): 
         # number of susceptibles at start 
         self.NS = 1000
 
@@ -20,7 +18,7 @@ class Collector:
         self.print_every = 10 
         self.skip_non_epidemics = False
 
-        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'Removed high risk', 'Removed low risk'])
+        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic'])
         self.stats = pd.DataFrame(columns = ['Measurement', 'mean', 'Std. Dev', 'Conf. Int (avg)', 'Min', 'Max'])
         self.density = pd.DataFrame(columns = ['Range', 'PDF', 'CDF']) 
 
@@ -33,24 +31,17 @@ class Collector:
         self.skip_non_epidemics = bool_value  
 
     def new_sim(self):
-        if (self.uncertainty["init"]):
-            self.N_high = binomial(self.NS, 0.5) 
-        else:
-            self.N_high = int(self.NS/2) 
-        
-        self.N_low = self.NS - self.N_high
         pop_specs = [
-            {"amount": self.N_high, "init_stage": "S", "p": 1/5000,  "group_name": "high_risk" }, 
-            {"amount": self.N_low, "init_stage": "S", "p": 1/15000, "group_name": "low_risk" }, 
-            {"amount": 1, "init_stage": "E"}
+            {"amount": self.NS, "init_stage": "S" }, 
+            {"amount": 1, "init_stage": "I"}
         ]
-        return Simulator(pop_specs, self.uncertainty)   
+        return Simulator(pop_specs)
 
     def step(self):
         sim = self.new_sim() 
         sim.run(print_every=False)
 
-        epidemic_size = self.NS - sim.get_num("S")         
+        epidemic_size = self.NS - sim.get_num("S")
 
         if (self.skip_non_epidemics and epidemic_size < self.epidemic_limit):
             self.skipped += 1 
@@ -58,9 +49,7 @@ class Collector:
             self.i += 1 
             self.table.loc[len(self.table)] = [
                 sim.time,
-                epidemic_size,  
-                self.N_high - sim.get_num("S", "high_risk"),
-                self.N_low - sim.get_num("S", "low_risk") 
+                epidemic_size
             ] 
             if (epidemic_size < self.epidemic_limit):
                 self.below_epidemic_limit += 1  
@@ -121,6 +110,7 @@ class Collector:
         print("Table saved as: {}".format(filename))
         filename = save_pandas_dataframe_as_csv(self.stats, "abm-stats-"+str(self.num_reps))
         print("Stats saved as: {}".format(filename))
+        print(self.stats)
         filename = save_pandas_dataframe_as_csv(self.density, "abm-density-"+str(self.num_reps)+"reps-"+str(bins)+"bins")
         print("Density saved as: {}".format(filename))
 
@@ -130,5 +120,5 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         num_reps = int(sys.argv[1])
 
-    collector = Collector(uncertainty={ "init":False, "param": False, "auth": False}) 
+    collector = Collector() 
     collector.run(num_reps)

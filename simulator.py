@@ -2,40 +2,30 @@ import math
 import pandas as pd
 import matplotlib.pyplot as plt 
 from prob import *
-from authority import * 
 from agent import * 
 
 
 
 class Simulator:
-    def __init__(self, pop_specs, uncertainty={ "param": True, "auth":True }): 
+    def __init__(self, pop_specs): 
         self.time = 0
-        self.timestep = 0.25 
+        self.timestep = 0.5 
         # keep track of how many individuals in each stage to save on computation time 
-        self.sizes = { "S": 0, "E": 0, "I": 0, "R": 0 } 
+        self.sizes = { "S": 0, "I": 0, "R": 0 } 
         # list of all agents 
         self.agents = []
         # save data for each time step 
         self.save = False 
-        self.table = pd.DataFrame(columns = ['time', 'S', 'E', 'I', 'R'])
-        self.uncertainty = uncertainty 
+        self.table = pd.DataFrame(columns = ['time', 'S', 'I', 'R'])
 
         for spec in pop_specs:
             for i in range(spec["amount"]):
                 self.add_agent(spec)
 
-        self.authority = Authority(len(self.agents), self.uncertainty["auth"])  
-
     def add_agent(self, spec): 
         new_agent = Agent(len(self.agents), spec, self.time)  
         self.agents.append(new_agent)
         self.sizes[spec["init_stage"]] += 1 
-
-    def new_p_factor(self): 
-        if(self.uncertainty["param"]):
-            self.p_factor = random.uniform(0.5, 1.5)
-        else: 
-            self.p_factor = 1
 
     def store_simulation(self, save_bool=True):
         self.save = save_bool
@@ -45,13 +35,12 @@ class Simulator:
         self.table.loc[len(self.table)] = [
             self.time,
             nums["S"],
-            nums["E"],
             nums["I"],
             nums["R"]
         ]
 
     def run(self, print_every=True):
-        while (self.get_num("E")+self.get_num("I") > 0):
+        while (self.get_num("I") > 0):
             self.step() 
             if (print_every):
                 print(self) 
@@ -63,14 +52,9 @@ class Simulator:
     def step(self):
         NI = self.get_num("I") 
 
-        self.authority.step(self.time, self.timestep, NI)
-
-        if (self.time%7 < self.timestep):
-            self.new_p_factor()  
-
         for agent in self.agents:
             pre_stage = agent.get_stage() 
-            agent.step(self.time, self.timestep, NI, self.p_factor, self.authority) 
+            agent.step(self.time, self.timestep, NI) 
             post_stage = agent.get_stage() 
             if (pre_stage != post_stage):
                 self.sizes[pre_stage]  -= 1
@@ -96,25 +80,21 @@ class Simulator:
     def plot(self):
         plt.plot( \
             self.table["time"].tolist(), self.table["S"].tolist(), "g-",\
-            self.table["time"].tolist(), self.table["E"].tolist(), "m-",\
             self.table["time"].tolist(), self.table["I"].tolist(), "r-",\
             self.table["time"].tolist(), self.table["R"].tolist(), "b-",\
         )
-        plt.legend(["S", "E", "I", "R"])
+        plt.legend(["S", "I", "R"])
         plt.xlabel("time")
         plt.ylabel("agents") 
         plt.show() 
 
 if __name__ == "__main__":
     specs = [
-        {"amount": 500, "init_stage": "S", "p": 1/5000, "group_name": "high_risk"}, 
-        {"amount": 500, "init_stage": "S", "p": 1/15000, "group_name": "low_risk"}, 
-        {"amount": 1, "init_stage": "E"}
+        {"amount": 500, "init_stage": "S"}, 
+        {"amount": 1, "init_stage": "I"}
     ]
     sim = Simulator(specs)  
     sim.store_simulation(True) 
     sim.run(print_every=False)
     print(sim)
-    print("number of REMOVED high risk {}".format(sim.get_num("R", "high_risk")))
-    print("number of REMOVED low risk {}".format(sim.get_num("R", "low_risk")))
     sim.plot()
