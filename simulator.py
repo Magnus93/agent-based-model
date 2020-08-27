@@ -28,7 +28,6 @@ class Simulator:
 
     def add_agent(self, spec): 
         new_agent = Agent(len(self.agents), spec, self.time)  
-        new_agent.set_stage(spec["init_stage"], self.time) 
         self.agents.append(new_agent)
         self.sizes[spec["init_stage"]] += 1 
 
