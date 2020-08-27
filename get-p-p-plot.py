@@ -25,7 +25,9 @@ if __name__=="__main__":
                 new_table[header] = css[key].tolist() 
 
         print(new_table) 
-        new_table.to_csv("p-p-plot-"+str(len(abm))+"bins.csv")
-
+        filename = "p-p-plot-"+str(len(abm))+"bins.csv" 
+        new_table.to_csv(filename)
+        print("saved as: \t"+filename) 
+        
     else:
         print("Not enough arguments") 
