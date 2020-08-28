@@ -33,7 +33,7 @@ class Collector:
     def new_sim(self):
         pop_specs = [
             {"amount": self.NS, "init_stage": "S" }, 
-            {"amount": 1, "init_stage": "I"}
+            {"amount": 1, "init_stage": "E"}
         ]
         return Simulator(pop_specs)
 
@@ -57,7 +57,13 @@ class Collector:
             if self.i%self.print_every == 0 and self.i != 0:
                 time_past = time.time() - self.start_time 
                 eta =  time_past*(self.num_reps - self.i) / self.i
-                print("iteration {}, \t eta: {}, \t skipped: {}".format(self.i, sec_to_str(eta), self.skipped))
+                string = "iteration {} \t".format(self.i)
+                string += "eta {} \t".format(sec_to_str(eta))
+                epidemic_mean = statistics.mean(self.table['Epidemic'].tolist()) 
+                string += "Epidemic mean: {} \t".format(epidemic_mean)
+                duration_mean = statistics.mean(self.table['Duration'].tolist()) 
+                string += "Duration mean: {} \t".format(duration_mean)
+                print(string) 
 
 
     def run(self, num_reps):

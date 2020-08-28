@@ -11,12 +11,12 @@ class Simulator:
         self.time = 0
         self.timestep = 0.5 
         # keep track of how many individuals in each stage to save on computation time 
-        self.sizes = { "S": 0, "I": 0, "R": 0 } 
+        self.sizes = { "S": 0, "E": 0, "I": 0, "R": 0 } 
         # list of all agents 
         self.agents = []
         # save data for each time step 
         self.save = False 
-        self.table = pd.DataFrame(columns = ['time', 'S', 'I', 'R'])
+        self.table = pd.DataFrame(columns = ['time', 'S', 'E', 'I', 'R'])
 
         for spec in pop_specs:
             for i in range(spec["amount"]):
@@ -35,12 +35,13 @@ class Simulator:
         self.table.loc[len(self.table)] = [
             self.time,
             nums["S"],
+            nums["E"],
             nums["I"],
             nums["R"]
         ]
 
     def run(self, print_every=True):
-        while (self.get_num("I") > 0):
+        while (self.get_num("E")+self.get_num("I") > 0):
             self.step() 
             if (print_every):
                 print(self) 
@@ -80,6 +81,7 @@ class Simulator:
     def plot(self):
         plt.plot( \
             self.table["time"].tolist(), self.table["S"].tolist(), "g-",\
+            self.table["time"].tolist(), self.table["E"].tolist(), "m-",\
             self.table["time"].tolist(), self.table["I"].tolist(), "r-",\
             self.table["time"].tolist(), self.table["R"].tolist(), "b-",\
         )
@@ -90,8 +92,8 @@ class Simulator:
 
 if __name__ == "__main__":
     specs = [
-        {"amount": 500, "init_stage": "S"}, 
-        {"amount": 1, "init_stage": "I"}
+        {"amount": 1000, "init_stage": "S"}, 
+        {"amount": 1, "init_stage": "E"}
     ]
     sim = Simulator(specs)  
     sim.store_simulation(True) 

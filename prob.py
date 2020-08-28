@@ -19,4 +19,15 @@ def binomial(N, prob):
 
 
 if __name__ == "__main__":
-    erlang(3, 5)
+    N = 1000000
+    sum = 0
+    for i in range(N):
+        sum += erlang(3, 5)
+    mean = sum/N 
+    print("erlang mean = {}".format(mean)) 
+
+    sum = 0
+    for i in range(N):
+        sum += expo(5)
+    mean = sum/N 
+    print("expo mean = {}".format(mean)) 
