@@ -74,7 +74,8 @@ class Collector:
         
         mean = statistics.mean(self.table['Duration'].tolist()) 
         stdev = statistics.stdev(self.table['Duration'].tolist())
-        sterror = stdev / math.sqrt(self.num_reps-1) 
+        # 1.96 for 95% confidence intervall 
+        sterror = 1.96*stdev / math.sqrt(self.num_reps-1) 
         self.stats.loc[0] = [
             'Duration',
             mean,
@@ -86,7 +87,8 @@ class Collector:
 
         mean = statistics.mean(self.table['Epidemic'].tolist()) 
         stdev = statistics.stdev(self.table['Epidemic'].tolist())
-        sterror = stdev / math.sqrt(self.num_reps-1) 
+        # 1.96 for 95% confidence intervall
+        sterror = 1.96*stdev / math.sqrt(self.num_reps-1) 
         self.stats.loc[1] = [
             'Epidemic',
             mean,
