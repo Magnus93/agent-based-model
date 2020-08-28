@@ -28,9 +28,9 @@ class Agent:
     def set_stage(self, new_stage, time):
         self.stage = new_stage 
         if (new_stage == "E"):
-            self.time_to_leave = time + expo(self.Te)   # -DT/2 ??
+            self.time_to_leave = time + expo(self.Te)
         elif (new_stage == "I"):
-            self.time_to_leave = time + erlang(3, self.Ti/3) # -DT/2 ?? 
+            self.time_to_leave = time + erlang(3, self.Ti/3) 
 
     def get_stage(self):
         return self.stage 
@@ -47,11 +47,13 @@ class Agent:
                 self.set_stage("E", time)  
 
         elif (self.stage == "E"):
-            if (self.time_to_leave <= time):    # +- DT/2 ? 
+            # -timestep/2 removes bias so trigger time is time_to_leave +/- timestep/2. 
+            if (self.time_to_leave - timestep/2 <= time):
                 self.set_stage("I", time) 
 
         elif (self.stage == "I"):
-            if (self.time_to_leave <= time):    # +- DT/2 ?  
+            # -timestep/2 removes bias so trigger time is time_to_leave +/- timestep/2. 
+            if (self.time_to_leave - timestep/2 <= time):
                 self.set_stage("R", time) 
 
 
