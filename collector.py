@@ -92,6 +92,7 @@ class Collector:
         print("num. repl.: \t{}".format(self.i))
         print("Skipped replications: \t{}".format(self.skipped)) 
         print("Replications without epidemics: \t{}".format(self.below_epidemic_limit))
+        print("timestep: \t{}".format(self.sim.timestep)) 
         
         filename = save_pandas_dataframe_as_csv(self.table.sort_values(by="Epidemic"), "abm-table-"+str(self.num_reps))
         print("Table saved as: {}".format(filename))
