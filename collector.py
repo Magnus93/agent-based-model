@@ -71,32 +71,11 @@ class Collector:
         self.num_reps = num_reps 
         while self.i < self.num_reps:
             self.step()
-        
-        mean = statistics.mean(self.table['Duration'].tolist()) 
-        stdev = statistics.stdev(self.table['Duration'].tolist())
-        # 1.96 for 95% confidence intervall 
-        sterror = 1.96*stdev / math.sqrt(self.num_reps-1) 
-        self.stats.loc[0] = [
-            'Duration',
-            mean,
-            stdev,
-            str(mean-sterror)+"  -  "+str(mean+sterror),
-            min(self.table['Duration'].tolist()),
-            max(self.table['Duration'].tolist()),
-        ]
 
-        mean = statistics.mean(self.table['Epidemic'].tolist()) 
-        stdev = statistics.stdev(self.table['Epidemic'].tolist())
-        # 1.96 for 95% confidence intervall
-        sterror = 1.96*stdev / math.sqrt(self.num_reps-1) 
-        self.stats.loc[1] = [
-            'Epidemic',
-            mean,
-            stdev,
-            str(mean-sterror)+"  -  "+str(mean+sterror),
-            min(self.table['Epidemic'].tolist()),
-            max(self.table['Epidemic'].tolist()),
-        ]
+        self.stats.loc[0] = get_list_of_stats("Duration", self.table["Duration"].tolist()) 
+        self.stats.loc[1] = get_list_of_stats("Epidemic", self.table["Epidemic"].tolist())
+        self.stats.loc[2] = get_list_of_stats("Epidemic_highrisk", self.table["Epidemic_highrisk"].tolist())
+        self.stats.loc[3] = get_list_of_stats("Epidemic_lowrisk", self.table["Epidemic_lowrisk"].tolist())
 
         bins = 20
         minimum = 0
