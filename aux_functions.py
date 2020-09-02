@@ -2,12 +2,16 @@ import pandas as pd
 import numpy as np 
 
 def sec_to_str(seconds):
-    m = int(seconds//60)
+    h = int(seconds//3600)
+    rest = seconds%3600
+    m = int(rest//60)
     s = int(seconds%60)
-    if m == 0:
-        return "{} s".format(s)
-    else:
+    if h != 0:
+        return "{} h {} min {} s".format(h, m, s)  
+    elif m != 0:
         return "{} min {} s".format(m, s)
+    else:
+        return "{} s".format(s)
 
 
 # filename without extension 
