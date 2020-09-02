@@ -1,5 +1,6 @@
 import random
 import math 
+import statistics
 import numpy as np 
 
 def expo(mean):
@@ -16,6 +17,20 @@ def erlang(k, mu):
 def binomial(N, prob):
     return np.sum(np.random.binomial(N, prob))
 
+
+def get_list_of_stats(name, data_list):
+    mean = statistics.mean(data_list) 
+    stdev = statistics.stdev(data_list)
+    # 1.96 for 95% confidence intervall
+    sterror = 1.96*stdev / math.sqrt(len(data_list)-1) 
+    return [
+        name,
+        mean,
+        stdev,
+        "{:.2f}  -  {:.2f}".format(mean-sterror, mean+sterror),
+        min(data_list),
+        max(data_list),
+    ]
 
 
 if __name__ == "__main__":
