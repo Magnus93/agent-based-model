@@ -1,26 +1,30 @@
 import math 
+import random
 import pandas as pd
 import matplotlib.pyplot as plt 
 from prob import *
 from agent import * 
-
+from authority import * 
 
 
 class Simulator:
     def __init__(self, pop_specs): 
         self.time = 0
-        self.timestep = 0.5 
+        self.timestep = 0.25 
         # keep track of how many individuals in each stage to save on computation time 
         self.sizes = { "S": 0, "E": 0, "I": 0, "R": 0 } 
         # list of all agents 
         self.agents = []
         # save data for each time step 
         self.save = False 
+        self.p_uncert = random.uniform(0.75, 1.25)
         self.table = pd.DataFrame(columns = ['time', 'S', 'E', 'I', 'R'])
 
         for spec in pop_specs:
             for i in range(spec["amount"]):
                 self.add_agent(spec)
+
+        self.authority = Authority(self.get_population()) 
 
     def add_agent(self, spec): 
         new_agent = Agent(len(self.agents), spec, self.time)  
@@ -53,13 +57,21 @@ class Simulator:
     def step(self):
         NI = self.get_num("I") 
 
+        self.authority.step(self.time, self.timestep, self.sizes["I"])
+
         for agent in self.agents:
             pre_stage = agent.get_stage() 
-            agent.step(self.time, self.timestep, NI) 
+            agent.step(self.time, self.timestep, NI, self.p_uncert, self.authority) 
             post_stage = agent.get_stage() 
             if (pre_stage != post_stage):
                 self.sizes[pre_stage]  -= 1
                 self.sizes[post_stage] += 1
+
+    def get_population(self):
+        population = 0
+        for key in self.sizes:
+            population += self.sizes[key]
+        return population
 
     def get_all_num(self):
         return self.sizes 

@@ -18,7 +18,7 @@ class Collector:
         self.print_every = 10 
         self.skip_non_epidemics = False
 
-        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic'])
+        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'Epidemic_highrisk', 'Epidemic_lowrisk'])
         self.stats = pd.DataFrame(columns = ['Measurement', 'mean', 'Std. Dev', 'Conf. Int (avg)', 'Min', 'Max'])
         self.density = pd.DataFrame(columns = ['Range', 'PDF', 'CDF']) 
 
@@ -31,25 +31,30 @@ class Collector:
         self.skip_non_epidemics = bool_value  
 
     def new_sim(self):
+        self.NS_high = binomial(self.NS, 0.5) 
+        self.NS_low = self.NS - self.NS_high 
         pop_specs = [
-            {"amount": self.NS, "init_stage": "S" }, 
-            {"amount": 1, "init_stage": "E"}
+            { "amount": self.NS_high, "init_stage": "S", "p": 1/5000, "group_name": "high_risk" }, 
+            { "amount": self.NS_low, "init_stage": "S", "p": 1/15000, "group_name": "low_risk" }, 
+            { "amount": 1, "init_stage": "E" }
         ]
         return Simulator(pop_specs)
 
     def step(self):
-        sim = self.new_sim() 
-        sim.run(print_every=False)
+        self.sim = self.new_sim() 
+        self.sim.run(print_every=False)
 
-        epidemic_size = self.NS - sim.get_num("S")
+        epidemic_size = self.NS - self.sim.get_num("S")
 
         if (self.skip_non_epidemics and epidemic_size < self.epidemic_limit):
             self.skipped += 1 
         else:
             self.i += 1 
             self.table.loc[len(self.table)] = [
-                sim.time,
-                epidemic_size
+                self.sim.time,
+                epidemic_size,
+                self.NS_high - self.sim.get_num("S", "high_risk"),
+                self.NS_low - self.sim.get_num("S", "low_risk")
             ] 
             if (epidemic_size < self.epidemic_limit):
                 self.below_epidemic_limit += 1  
@@ -59,11 +64,11 @@ class Collector:
                 eta =  time_past*(self.num_reps - self.i) / self.i
                 string = "iteration {} \t".format(self.i)
                 string += "eta {} \t".format(sec_to_str(eta))
-                epidemic_mean = statistics.mean(self.table['Epidemic'].tolist()) 
-                string += "Epidemic mean: {} \t".format(epidemic_mean)
-                duration_mean = statistics.mean(self.table['Duration'].tolist()) 
-                string += "Duration mean: {} \t".format(duration_mean)
                 print(string) 
+                temp_stats = pd.DataFrame(columns=['Measurement', 'Mean', 'Std.Dev', 'Conf.Int', 'min', 'max'])
+                temp_stats.loc[0] = get_list_of_stats("Epidemic", self.table["Epidemic"].tolist())
+                print(temp_stats)
+                print()
 
 
     def run(self, num_reps):

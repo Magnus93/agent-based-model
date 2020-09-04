@@ -26,7 +26,7 @@ def get_list_of_stats(name, data_list):
     return [
         name,
         mean,
-        stdev,
+        "{:.2f}".format(stdev),
         "{:.2f}  -  {:.2f}".format(mean-sterror, mean+sterror),
         min(data_list),
         max(data_list),
