@@ -14,12 +14,7 @@ class Authority:
         self.delay = 0 
 
     def step(self, time, timestep, I):
-        # esitmate number of infectious 
-        if (time%7 < timestep):
-            self.est_infectious = I * max(0, random.normalvariate(1, 0.25))
-            self.delay = random.triangular(3, 7, 5)
-
-        if (self.est_infectious > self.limit * self.pop_size and self.delay-timestep/2 <= time%7 < self.delay+timestep/2):
+        if (I > self.limit * self.pop_size):
             self.preventive_measures = True
 
     def get_p_factor(self):
