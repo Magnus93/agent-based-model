@@ -97,7 +97,7 @@ class Simulator:
             self.table["time"].tolist(), self.table["I"].tolist(), "r-",\
             self.table["time"].tolist(), self.table["R"].tolist(), "b-",\
         )
-        plt.legend(["S", "I", "R"])
+        plt.legend(["S", "E", "I", "R"])
         plt.xlabel("time")
         plt.ylabel("agents") 
         plt.show() 

@@ -44,7 +44,7 @@ class Agent:
             p = self.p * p_uncert * authority.get_p_factor() 
             risk = 1 - math.exp(timestep * NI * math.log(1-p))
             if uniform <= risk:
-                self.set_stage("I", time)  
+                self.set_stage("E", time)  
         
         elif (self.stage == "E"):
             # -timestep/2 removes bias so trigger time is time_to_leave +/- timestep/2. 
