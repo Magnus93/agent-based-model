@@ -3,7 +3,7 @@ from prob import *
 
 defaults = { 
     "p": 1/7500, 
-    "Te": 5, 
+    "Te": 5,
     "Ti": 15, 
     "group_name": "noname" 
 }
@@ -29,8 +29,8 @@ class Agent:
         self.stage = new_stage 
         if (new_stage == "E"):
             self.time_to_leave = time + expo(self.Te)
-        elif (new_stage == "I"):
-            self.time_to_leave = time + erlang(3, self.Ti/3) 
+        if (new_stage == "I"):
+            self.time_to_leave = time + erlang(3, self.Ti/3)
 
     def get_stage(self):
         return self.stage 
@@ -41,16 +41,16 @@ class Agent:
     def step(self, time, timestep, NI, p_uncert, authority):
         if (self.stage == "S"):
             uniform = random.random()
-            p = self.p * p_uncert * authority.get_p_factor() 
+            p = self.p * p_uncert           #* authority.get_p_factor() 
             risk = 1 - math.exp(timestep * NI * math.log(1-p))
             if uniform <= risk:
-                self.set_stage("E", time)  
-
+                self.set_stage("I", time)  
+        
         elif (self.stage == "E"):
             # -timestep/2 removes bias so trigger time is time_to_leave +/- timestep/2. 
             if (self.time_to_leave - timestep/2 <= time):
                 self.set_stage("I", time) 
-
+        
         elif (self.stage == "I"):
             # -timestep/2 removes bias so trigger time is time_to_leave +/- timestep/2. 
             if (self.time_to_leave - timestep/2 <= time):

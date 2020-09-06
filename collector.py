@@ -18,7 +18,7 @@ class Collector:
         self.print_every = 10 
         self.skip_non_epidemics = False
 
-        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'Epidemic_highrisk', 'Epidemic_lowrisk'])
+        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'ep_high', 'ep_low'])
         self.stats = pd.DataFrame(columns = ['Measurement', 'mean', 'Std. Dev', 'Conf. Int (avg)', 'Min', 'Max'])
         self.density = pd.DataFrame(columns = ['Range', 'PDF', 'CDF']) 
 
@@ -79,8 +79,8 @@ class Collector:
 
         self.stats.loc[0] = get_list_of_stats("Duration", self.table["Duration"].tolist()) 
         self.stats.loc[1] = get_list_of_stats("Epidemic", self.table["Epidemic"].tolist())
-        self.stats.loc[2] = get_list_of_stats("Epidemic_highrisk", self.table["Epidemic_highrisk"].tolist())
-        self.stats.loc[3] = get_list_of_stats("Epidemic_lowrisk", self.table["Epidemic_lowrisk"].tolist())
+        self.stats.loc[2] = get_list_of_stats("Epidemic high", self.table["ep_high"].tolist())
+        self.stats.loc[3] = get_list_of_stats("Epidemic low", self.table["ep_low"].tolist())
 
         bins = 20
         minimum = 0
