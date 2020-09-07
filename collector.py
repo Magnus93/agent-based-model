@@ -18,7 +18,7 @@ class Collector:
         self.print_every = 10 
         self.skip_non_epidemics = False
 
-        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'ep_high', 'ep_low'])
+        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'ep_high', 'ep_low', 'delay', 'time_until_measure', 'measure occured'])
         self.stats = pd.DataFrame(columns = ['Measurement', 'mean', 'Std. Dev', 'Conf. Int (avg)', 'Min', 'Max'])
         self.density = pd.DataFrame(columns = ['Range', 'PDF', 'CDF']) 
 
@@ -54,7 +54,10 @@ class Collector:
                 self.sim.time,
                 epidemic_size,
                 self.NS_high - self.sim.get_num("S", "high_risk"),
-                self.NS_low - self.sim.get_num("S", "low_risk")
+                self.NS_low - self.sim.get_num("S", "low_risk"),
+                self.sim.authority.delay,
+                self.sim.authority.time_of_measures,
+                int(self.sim.authority.preventive_measures)
             ] 
             if (epidemic_size < self.epidemic_limit):
                 self.below_epidemic_limit += 1  
@@ -77,10 +80,8 @@ class Collector:
         while self.i < self.num_reps:
             self.step()
 
-        self.stats.loc[0] = get_list_of_stats("Duration", self.table["Duration"].tolist()) 
-        self.stats.loc[1] = get_list_of_stats("Epidemic", self.table["Epidemic"].tolist())
-        self.stats.loc[2] = get_list_of_stats("Epidemic high", self.table["ep_high"].tolist())
-        self.stats.loc[3] = get_list_of_stats("Epidemic low", self.table["ep_low"].tolist())
+        for key in self.table.columns:
+            self.stats.loc[len(self.stats)] = get_list_of_stats(key, self.table[key].tolist())
 
         bins = 20
         minimum = 0
