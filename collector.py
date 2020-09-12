@@ -18,7 +18,7 @@ class Collector:
         self.print_every = 10 
         self.skip_non_epidemics = False
 
-        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'ep_high', 'ep_low', 'delay', 'time_until_measure', 'measure occured'])
+        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'ep_high', 'ep_low', 'Rt', 'delay', 'time_until_measure', 'measure occured'])
         self.stats = pd.DataFrame(columns = ['Measurement', 'mean', 'Std. Dev', 'Conf. Int (avg)', 'Min', 'Max'])
         self.density = pd.DataFrame(columns = ['Range', 'PDF', 'CDF']) 
 
@@ -55,6 +55,7 @@ class Collector:
                 epidemic_size,
                 self.NS_high - self.sim.get_num("S", "high_risk"),
                 self.NS_low - self.sim.get_num("S", "low_risk"),
+                self.sim.get_num("S", "high_risk") * 1/5000 * 15 + self.sim.get_num("S", "low_risk") * 1/15000 * 15,
                 self.sim.authority.delay,
                 self.sim.authority.time_of_measures,
                 int(self.sim.authority.preventive_measures)
