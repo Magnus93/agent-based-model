@@ -18,8 +18,11 @@ class Authority:
         self.delay = expo(3.5) 
 
     def step(self, time, timestep, I): 
-        if (self.above_limit == False):
+        if (time%1 < timestep):
+            # estimate number of infectious once per day 
             self.est_infectious = I * random.normalvariate(1, 0.25)
+
+        if (self.above_limit == False):
             if (self.est_infectious > self.limit * self.pop_size):
                 self.time_of_measures = time + self.delay 
                 self.above_limit = True
