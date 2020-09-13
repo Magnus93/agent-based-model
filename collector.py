@@ -49,13 +49,15 @@ class Collector:
         if (self.skip_non_epidemics and epidemic_size < self.epidemic_limit):
             self.skipped += 1 
         else:
+            Rt = (self.sim.get_num("S", "high_risk") * 1/5000 + self.sim.get_num("S", "low_risk") * 1/15000) \
+            * self.sim.p_uncert * self.sim.authority.get_p_factor() * 15 
             self.i += 1 
             self.table.loc[len(self.table)] = [
                 self.sim.time,
                 epidemic_size,
                 self.NS_high - self.sim.get_num("S", "high_risk"),
                 self.NS_low - self.sim.get_num("S", "low_risk"),
-                self.sim.get_num("S", "high_risk") * 1/5000 * 15 + self.sim.get_num("S", "low_risk") * 1/15000 * 15,
+                Rt,
                 self.sim.authority.delay,
                 self.sim.authority.time_of_measures,
                 int(self.sim.authority.preventive_measures)
