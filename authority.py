@@ -14,8 +14,7 @@ class Authority:
         self.preventive_measures = False 
         self.time_of_measures = 0 
         self.above_limit = False 
-
-        self.delay = expo(3.5) 
+        self.delay = 0
 
     def step(self, time, timestep, I): 
         if (time%1 < timestep):
@@ -24,13 +23,9 @@ class Authority:
 
         if (self.above_limit == False):
             if (self.est_infectious > self.limit * self.pop_size):
-                self.time_of_measures = time + self.delay 
+                self.time_of_measures = time
                 self.above_limit = True
-        
-        if (self.above_limit == True): 
-            if (time - timestep/2 <= self.time_of_measures < time + timestep/2):
                 self.preventive_measures = True
-
 
     def get_p_factor(self):
         if (self.preventive_measures):
