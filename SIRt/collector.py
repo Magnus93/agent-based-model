@@ -18,7 +18,7 @@ class Collector:
         self.print_every = 10 
         self.skip_non_epidemics = False
 
-        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic'])
+        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'Rt'])
 
         # count the number of replications 
         self.i = 0  
@@ -47,7 +47,8 @@ class Collector:
             self.i += 1 
             self.table.loc[len(self.table)] = [
                 self.sim.time,
-                epidemic_size
+                epidemic_size,
+                self.sim.get_num("S") * 15 * 1/7500
             ] 
             if (epidemic_size < self.epidemic_limit):
                 self.below_epidemic_limit += 1  
