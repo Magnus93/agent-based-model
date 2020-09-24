@@ -1,0 +1,31 @@
+import random 
+from prob import * 
+
+class Authority:
+    def __init__(self, population_size):
+        # estimated infectious 
+        self.est_infectious = 0 
+        # poulation size 
+        self.pop_size = population_size 
+        
+        # percent limit of infectious in the population 
+        # if the limit is past then preventive measures start 
+        self.limit = 0.05
+        self.preventive_measures = False 
+        self.time_of_prevention = 0 
+        self.above_limit = False 
+        self.delay = 0
+
+    def step(self, time, timestep, I): 
+        if (self.above_limit == False):
+            if (I > self.limit * self.pop_size):
+                self.time_of_prevention = time + self.delay 
+                self.above_limit = True
+                self.preventive_measures = True
+
+    def get_p_factor(self):
+        if (self.preventive_measures):
+            return 0.5
+        else:
+            return 1
+    
