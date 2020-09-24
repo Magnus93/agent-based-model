@@ -58,6 +58,7 @@ class Collector:
                 string = "iteration {} \t".format(self.i)
                 string += "eta {} \t".format(sec_to_str(eta))
                 print(string) 
+                print("Epidemic avg: {}".format(statistics.mean(self.table["Epidemic"].tolist())))
 
     def run(self, num_reps):
         self.start_time = time.time()
