@@ -23,11 +23,8 @@ class Authority:
 
         if (self.above_limit == False):
             if (self.est_infectious > self.limit * self.pop_size):
-                self.time_of_prevention = time + self.delay 
+                self.time_of_prevention = time
                 self.above_limit = True
-        
-        if (self.above_limit):
-            if (time-timestep/2 <= self.time_of_prevention < time+timestep/2):
                 self.preventive_measures = True
 
     def get_p_factor(self):
