@@ -38,11 +38,10 @@ class Agent:
     def get_group_name(self):
         return self.group_name 
 
-    def step(self, time, timestep, NI, p_uncert):
+    def step(self, time, timestep, NI):
         if (self.stage == "S"):
             uniform = random.random()
-            p = self.p * p_uncert 
-            risk = 1 - math.exp(timestep * NI * math.log(1-p))
+            risk = 1 - math.exp(timestep * NI * math.log(1-self.p))
             if uniform <= risk:
                 self.set_stage("E", time)  
         
