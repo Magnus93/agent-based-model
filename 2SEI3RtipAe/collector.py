@@ -6,7 +6,7 @@ import pandas as pd
 import statistics
 import time 
 from aux_functions import * 
-from ../prob import * 
+from prob import * 
 import matplotlib.pyplot as plt  
 
 class Collector:
