@@ -1,7 +1,6 @@
 import random
 import math 
 import statistics
-import numpy as np 
 
 def expo(mean):
     rand = random.random()
@@ -15,7 +14,11 @@ def erlang(k, mu):
     return result 
 
 def binomial(N, prob):
-    return np.sum(np.random.binomial(N, prob))
+    sum = 0
+    for i in range(N):
+        if random.random() < prob:
+            sum += 1 
+    return sum 
 
 
 def get_list_of_stats(name, data_list):
