@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 
 class Collector:
     def __init__(self): 
+        self.init_seed = 1233
+        random.seed(self.init_seed)
+
         # number of susceptibles at start 
         self.NS = 1000
 
@@ -73,7 +76,7 @@ class Collector:
         print("Replications without epidemics: \t{}".format(self.below_epidemic_limit))
         print("timestep: \t{}".format(self.sim.timestep)) 
         
-        filename = save_pandas_dataframe_as_csv(self.table, "abm-table-"+str(self.num_reps))
+        filename = save_pandas_dataframe_as_csv(self.table, "abm-data-seed"+str(self.init_seed)+"-"+str(self.num_reps))
         print("Table saved as: {}".format(filename))
 
 if __name__ == "__main__":
