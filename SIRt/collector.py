@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 class Collector:
     def __init__(self): 
         self.init_seed = 1232
-        random.seed(1232)
+        random.seed(self.init_seed)
 
         # number of susceptibles at start 
         self.NS = 1000
