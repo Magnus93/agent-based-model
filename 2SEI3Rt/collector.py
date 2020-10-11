@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 
 class Collector:
     def __init__(self): 
+        self.init_seed = 1235
+        random.seed(self.init_seed)
+
         # number of susceptibles at start 
         self.NS = 1000
 
@@ -63,6 +66,7 @@ class Collector:
                 string = "iteration {} \t".format(self.i)
                 string += "eta {} \t".format(sec_to_str(eta))
                 print(string) 
+                print("Epidemic avg: {}".format(statistics.mean(self.table["Epidemic"].tolist())))
 
     def run(self, num_reps):
         self.start_time = time.time()
@@ -78,7 +82,7 @@ class Collector:
         print("Replications without epidemics: \t{}".format(self.below_epidemic_limit))
         print("timestep: \t{}".format(self.sim.timestep)) 
         
-        filename = save_pandas_dataframe_as_csv(self.table, "abm-table-"+str(self.num_reps))
+        filename = save_pandas_dataframe_as_csv(self.table, "abm-data-seed"+str(self.init_seed)+"-"+str(self.num_reps))
         print("Table saved as: {}".format(filename))
 
 if __name__ == "__main__":
