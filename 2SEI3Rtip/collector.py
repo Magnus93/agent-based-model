@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 
 class Collector:
     def __init__(self): 
+        self.init_seed = 1237 
+        random.seed(self.init_seed)
+
         # number of susceptibles at start 
         self.NS = 1000
 
@@ -18,7 +21,7 @@ class Collector:
         self.print_every = 10 
         self.skip_non_epidemics = False
 
-        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'ep_high', 'ep_low'])
+        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'ep_high', 'ep_low', 'Rt'])
 
         # count the number of replications 
         self.i = 0  
@@ -52,7 +55,9 @@ class Collector:
                 self.sim.time,
                 epidemic_size,
                 self.NS_high - self.sim.get_num("S", "high_risk"),
-                self.NS_low - self.sim.get_num("S", "low_risk")
+                self.NS_low - self.sim.get_num("S", "low_risk"),
+                self.sim.get_num("S", "low_risk") * 15 * 1/15000 * self.sim.p_uncert + \
+                self.sim.get_num("S", "high_risk") * 15 * 1/5000 * self.sim.p_uncert  
             ] 
             if (epidemic_size < self.epidemic_limit):
                 self.below_epidemic_limit += 1  
@@ -63,6 +68,7 @@ class Collector:
                 string = "iteration {} \t".format(self.i)
                 string += "eta {} \t".format(sec_to_str(eta))
                 print(string) 
+                print("Epidemic avg: {}".format(statistics.mean(self.table["Epidemic"].tolist())))
 
     def run(self, num_reps):
         self.start_time = time.time()
@@ -78,7 +84,7 @@ class Collector:
         print("Replications without epidemics: \t{}".format(self.below_epidemic_limit))
         print("timestep: \t{}".format(self.sim.timestep)) 
         
-        filename = save_pandas_dataframe_as_csv(self.table, "abm-table-"+str(self.num_reps))
+        filename = save_pandas_dataframe_as_csv(self.table, "abm-data-seed"+str(self.init_seed)+"-"+str(self.num_reps))
         print("Table saved as: {}".format(filename))
 
 if __name__ == "__main__":

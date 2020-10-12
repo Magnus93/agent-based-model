@@ -21,7 +21,7 @@ class Collector:
         self.print_every = 10 
         self.skip_non_epidemics = False
 
-        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'ep_high', 'ep_low'])
+        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'ep_high', 'ep_low', 'Rt'])
 
         # count the number of replications 
         self.i = 0  
@@ -55,7 +55,8 @@ class Collector:
                 self.sim.time,
                 epidemic_size,
                 self.NS_high - self.sim.get_num("S", "high_risk"),
-                self.NS_low - self.sim.get_num("S", "low_risk")
+                self.NS_low - self.sim.get_num("S", "low_risk"),
+                self.sim.get_num("S", "low_risk") * 15 * 1/15000 + self.sim.get_num("S", "high_risk") * 15 * 1/5000
             ] 
             if (epidemic_size < self.epidemic_limit):
                 self.below_epidemic_limit += 1  
@@ -66,6 +67,7 @@ class Collector:
                 string = "iteration {} \t".format(self.i)
                 string += "eta {} \t".format(sec_to_str(eta))
                 print(string) 
+                print("Epidemic avg: {}".format(statistics.mean(self.table["Epidemic"].tolist())))
 
     def run(self, num_reps):
         self.start_time = time.time()
