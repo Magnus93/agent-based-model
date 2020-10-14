@@ -4,6 +4,23 @@ Agent Based SEIR simulation model made in python. The model is used to be compar
 
 
 
+# Set seed to models according to:
+
+| model        | SEED  |
+| ------------ | ----- |
+| SIR          | NONE  |
+| SIRt         | 1232  |
+| SEIRt        | 1233  |
+| SEI3Rt       | 1234  |
+| 2SEI3Rt      | 1235  |
+| 2SEI3Rti     | 1236  |
+| 2SEI3Rtip    | 1237  |
+| 2SEI3RtipA   | 1238  |
+| 2SEI3RtipAe  | 1239  |
+| 2SEI3RtipAed | 12310 |
+
+
+
 #Compare ABM and CSS model
 
 ##ABM
