@@ -14,7 +14,7 @@ class Authority:
         self.preventive_measures = False 
         self.time_of_prevention = 0 
         self.above_limit = False 
-        self.delay = 0
+        self.delay = expo(3.5) 
 
     def step(self, time, timestep, I): 
         if (time%1 < timestep):
