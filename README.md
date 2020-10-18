@@ -1,10 +1,10 @@
-#agent-based-seir
+#Epidemic CSS and ABM models 
 
-Agent Based SEIR simulation model made in python. The model is used to be compared with a StochSD model. 
+This repo consists of several CSS and ABM files based on the same Conceptual Model.
 
+The ABM models are written in Python and the CCS (`SSD` files) can be run in [StochSD](https://stochsd.sourceforge.io/).
 
-
-# Set seed to models according to:
+##Set seed to models according to:
 
 | model        | SEED  |
 | ------------ | ----- |
@@ -21,37 +21,33 @@ Agent Based SEIR simulation model made in python. The model is used to be compar
 
 
 
-#Compare ABM and CSS model
+##Run ABM
 
-##ABM
+Go into any of the files labeled `SIRt` to `2SEI3RtipAed` and run `python collector.py 10000 output.csv`.
 
-Run: `python collector.py 1000`.
-
-1000 specifies the number of replications.
-
-This will generate a CSV-file called `abm-density-1000reps-20bins.csv`.
+This will create and save a csv file containing 10 000 data points.
 
 ##CSS (StochSD and StatRes) 
 
-Open StochSD and open the model  `...` 
+Open StochSD and open the model  desired model.
 
-Open StatRes and and add variable `Epidemic` to the list run the model for 1000 replications and then export the result to CSV.
+Open StatRes and and add variable `Epidemic`, `Duration`, `Rt` and `Extinction` to the list
 
-Rename the exported file to `css-data.csv`  for clarity and then run the command: 
+Select seed-of-seeds according to the table above.
 
-`python convert-epidemic-data-to-cdf.py css-data.csv` 
+Run the model for 10 000 replications and then export the data to a CSV file.
 
-This will convert the epidemic data to the file `css-density-1000reps-20bins.csv` 
+##Get Statistical Results
+
+Get statistical Results by running one of the fore mentioned csv files using:
+
+`python stats.py [model_type] [filename.csv]`
+
+Where `[model_type]` is SIRt, SEIRt, etc.
+
+And `filename.csv` is the desired data file containing 10 000 data points. 
 
 
-
-## Compare ABM CDF and CSS CDF
-
-run the script: 
-
-`python .\get-p-p-plot.py abm-density-20reps-20bins.csv css-density-1000reps-20bins.csv`
-
-This will merge the the files into one CSV-file. Here the file can be opened in a speadsheet program of your choosing to compare the two CSV-files in a p-p diagram. 
 
 
 
