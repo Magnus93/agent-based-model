@@ -22,6 +22,11 @@ class Agent:
         self.p = get_attr(spec, "p")
         self.Te = get_attr(spec, "Te")
         self.Ti = get_attr(spec, "Ti")
+        
+        # measured time of entering stages 
+        self.time_exposed = 0
+        self.time_infectious = 0
+        self.time_recovered = 0 
 
         self.set_stage(spec["init_stage"], time) 
 
@@ -29,8 +34,12 @@ class Agent:
         self.stage = new_stage 
         if (new_stage == "E"):
             self.time_to_leave = time + expo(self.Te)
-        if (new_stage == "I"):
+            self.time_exposed = time 
+        elif (new_stage == "I"):
             self.time_to_leave = time + erlang(3, self.Ti/3)
+            self.time_infectious = time 
+        elif (new_stage == "R"):
+            self.time_recovered = time 
 
     def get_stage(self):
         return self.stage 

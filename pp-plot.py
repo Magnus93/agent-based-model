@@ -42,15 +42,12 @@ if __name__=="__main__":
     print(prob_abm)
     print(prob_css)
 
-
-    font = {'family' : 'normal',
-        'weight' : 'bold',
-        'size'   : 22}
+    font_size = 16 
 
     plt.plot([0, 1],[0, 1])
     plt.plot(prob_css, prob_abm, "rx")
-    plt.ylabel("ABM")
-    plt.xlabel("CSS")
-    plt.title(dimension+" p-p-plot")
-    plt.legend(["Reference line","Values"])
+    plt.ylabel("ABM", fontsize=font_size)
+    plt.xlabel("CSS", fontsize=font_size)
+    plt.title("Final "+dimension+" P-P plot", fontsize=font_size)
+    plt.legend(["Reference line","Values"], fontsize=font_size)
     plt.show()

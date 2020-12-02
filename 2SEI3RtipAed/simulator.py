@@ -19,6 +19,8 @@ class Simulator:
         self.save = False 
         self.p_uncert = random.uniform(0.75, 1.25)
         self.table = pd.DataFrame(columns = ['time', 'S', 'E', 'I', 'R'])
+        self.avg_exposed_time = 0 
+        self.avg_infectious_time = 0
 
         for spec in pop_specs:
             for i in range(spec["amount"]):
@@ -52,7 +54,17 @@ class Simulator:
             if (self.save):
                 self.store_time()
             self.time += self.timestep 
-
+        self.save_average_sojourn()
+        
+    def save_average_sojourn(self):
+        sum_Te = 0
+        sum_Ti = 0
+        for agent in self.agents:
+            if agent.stage == "R":
+                sum_Te += agent.time_infectious - agent.time_exposed
+                sum_Ti += agent.time_recovered - agent.time_infectious
+        self.avg_exposed_time = sum_Te/self.sizes["R"]
+        self.avg_infectious_time = sum_Ti/self.sizes["R"]
 
     def step(self):
         NI = self.get_num("I") 

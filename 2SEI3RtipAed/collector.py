@@ -20,7 +20,7 @@ class Collector:
         self.print_every = 10 
         self.skip_non_epidemics = False
 
-        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'ep_high', 'ep_low', 'Rt', 'delay_time', 'time_until', 'prevention'])
+        self.table = pd.DataFrame(columns = ['Duration', 'Epidemic', 'ep_high', 'ep_low', 'Rt', 'delay_time', 'time_until', 'prevention', 'avg_Te', 'avg_Ti'])
 
         # count the number of replications 
         self.i = 0  
@@ -61,7 +61,9 @@ class Collector:
                 Rt,
                 self.sim.authority.delay,
                 self.sim.authority.time_of_prevention,
-                int(self.sim.authority.preventive_measures)
+                int(self.sim.authority.preventive_measures),
+                self.sim.avg_exposed_time,
+                self.sim.avg_infectious_time
             ] 
             if (epidemic_size < self.epidemic_limit):
                 self.below_epidemic_limit += 1  
@@ -72,7 +74,11 @@ class Collector:
                 string = "iteration {} \t".format(self.i)
                 string += "eta {} \t".format(sec_to_str(eta))
                 print(string) 
-                print("Epidemic avg: {}".format(statistics.mean(self.table["Epidemic"].tolist())))
+                self.print_stats()
+
+    def print_stats(self):
+        for col in self.table.columns:
+            print(get_list_of_stats(col, self.table[col].tolist()))
 
 
     def run(self, num_reps):
@@ -88,6 +94,7 @@ class Collector:
         print("Skipped replications: \t{}".format(self.skipped)) 
         print("Replications without epidemics: \t{}".format(self.below_epidemic_limit))
         print("timestep: \t{}".format(self.sim.timestep)) 
+        self.print_stats()
         
         filename = save_pandas_dataframe_as_csv(self.table, "abm-data-seed"+str(self.init_seed)+"-"+str(self.num_reps))
         print("Table saved as: {}".format(filename))
